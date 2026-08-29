@@ -1,0 +1,35 @@
+@model List<CreditCardAnalyzer.Models.Transaction>
+
+<h1>Credit Card Spending Analysis</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Transaction Date</th>
+            <th>Posted Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Net Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var transaction in Model)
+        {
+            <tr>
+                <td>@transaction.TransactionDate.ToShortDateString()</td>
+                <td>@transaction.PostedDate.ToShortDateString()</td>
+                <td>@transaction.Description</td>
+                <td>@transaction.Category</td>
+                <td>@transaction.Debit</td>
+                <td>@transaction.Credit</td>
+                <td style="color: @(transaction.NetAmount >= 0 ? "green" : "red")">
+                    @transaction.NetAmount.ToString("C")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Add a Chart.js visualization later -->

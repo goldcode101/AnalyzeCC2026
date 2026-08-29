@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "cTKqhq7NdmY=",
+  "success": true,
+  "projectFilePath": "C:\\Code\\CSharp\\AnalyzeCC2026\\AnalyzeCC2026\\AnalyzeCC2026.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\itsch\\.nuget\\packages\\chart.js\\3.7.1\\chart.js.3.7.1.nupkg.sha512",
+    "C:\\Users\\itsch\\.nuget\\packages\\csvhelper\\33.1.0\\csvhelper.33.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<h1>Credit Card Spending Analyzer</h1>
+
+<p>Welcome to your credit card spending analysis tool!</p>
+
+<!-- Add a styled button link -->
+@Html.ActionLink(
+    "View Spending Analysis",
+    "Index",
+    "Analysis",
+    new { area = "" },
+    new { @class = "btn btn-primary"
+})
