@@ -17,7 +17,15 @@ namespace CreditCardAnalyzer.Controllers
         public IActionResult Index()
         {
             var transactions = _transactionService.ImportTransactions();
-            return View(transactions);
+            var summary = TransactionService.BuildAnalysisSummary(transactions);
+
+            var viewModel = new AnalysisViewModel
+            {
+                Transactions = transactions,
+                Summary = summary
+            };
+
+            return View(viewModel);
         }
     }
 }

@@ -1,35 +1,145 @@
-@model List<CreditCardAnalyzer.Models.Transaction>
+@model CreditCardAnalyzer.Models.AnalysisViewModel
 
 <h1>Credit Card Spending Analysis</h1>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Transaction Date</th>
-            <th>Posted Date</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Debit</th>
-            <th>Credit</th>
-            <th>Net Amount</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var transaction in Model)
-        {
-            <tr>
-                <td>@transaction.TransactionDate.ToShortDateString()</td>
-                <td>@transaction.PostedDate.ToShortDateString()</td>
-                <td>@transaction.Description</td>
-                <td>@transaction.Category</td>
-                <td>@transaction.Debit</td>
-                <td>@transaction.Credit</td>
-                <td style="color: @(transaction.NetAmount >= 0 ? "green" : "red")">
-                    @transaction.NetAmount.ToString("C")
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total Spent</h5>
+                <p class="display-6 mb-0">@Model.Summary.TotalSpent.ToString("C")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Months Tracked</h5>
+                <p class="display-6 mb-0">@Model.Summary.MonthlyTotals.Count</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Largest Category</h5>
+                <p class="display-6 mb-0">@Model.Summary.ByCategory.OrderByDescending(x => x.Value.TotalSpent).FirstOrDefault().Key</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- Add a Chart.js visualization later -->
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">By Month</h5>
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th class="text-end">Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var month in Model.Summary.MonthlyTotals.OrderByDescending(x => x.Key))
+                        {
+                            <tr>
+                                <td>@month.Key</td>
+                                <td class="text-end">@month.Value.TotalSpent.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">By Category</h5>
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th class="text-end">Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var category in Model.Summary.ByCategory.OrderByDescending(x => x.Value.TotalSpent))
+                        {
+                            <tr>
+                                <td>@category.Key</td>
+                                <td class="text-end">@category.Value.TotalSpent.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">By Merchant</h5>
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Merchant</th>
+                            <th class="text-end">Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var merchant in Model.Summary.ByMerchant.OrderByDescending(x => x.Value.TotalSpent).Take(10))
+                        {
+                            <tr>
+                                <td>@merchant.Key</td>
+                                <td class="text-end">@merchant.Value.TotalSpent.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-5">
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#raw-data-table" aria-expanded="false" aria-controls="raw-data-table">
+        Show raw data
+    </button>
+
+    <div class="collapse mt-3" id="raw-data-table">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Transaction Date</th>
+                    <th>Posted Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Debit</th>
+                    <th>Credit</th>
+                    <th>Net Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in Model.Transactions)
+                {
+                    <tr>
+                        <td>@transaction.TransactionDate.ToShortDateString()</td>
+                        <td>@transaction.PostedDate.ToShortDateString()</td>
+                        <td>@transaction.Description</td>
+                        <td>@transaction.Category</td>
+                        <td>@transaction.Debit.ToString("C")</td>
+                        <td>@transaction.Credit.ToString("C")</td>
+                        <td style="color: @(transaction.NetAmount >= 0 ? "green" : "red")">
+                            @transaction.NetAmount.ToString("C")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

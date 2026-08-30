@@ -26,6 +26,34 @@ namespace CreditCardAnalyzer.Services
             }
         }
 
+        public static AnalysisSummary BuildAnalysisSummary(IEnumerable<Transaction> transactions)
+        {
+            var summary = new AnalysisSummary();
+
+            foreach (var transaction in transactions.Where(t => t.Debit > 0))
+            {
+                var monthKey = transaction.TransactionDate.ToString("yyyy-MM");
+
+                AddToGroup(summary.MonthlyTotals, monthKey, transaction);
+                AddToGroup(summary.ByMonth, monthKey, transaction);
+                AddToGroup(summary.ByCategory, transaction.Category, transaction);
+                AddToGroup(summary.ByMerchant, transaction.Description, transaction);
+            }
+
+            return summary;
+        }
+
+        private static void AddToGroup(Dictionary<string, TransactionGroup> groups, string key, Transaction transaction)
+        {
+            if (!groups.TryGetValue(key, out var group))
+            {
+                group = new TransactionGroup { Name = key };
+                groups[key] = group;
+            }
+
+            group.Add(transaction);
+        }
+
         private class TransactionMap : ClassMap<Transaction>
         {
             public TransactionMap()
