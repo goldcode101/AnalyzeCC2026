@@ -1,145 +1,69 @@
 @using System.Globalization
+@using System.Text.Json
 @model CreditCardAnalyzer.Models.AnalysisViewModel
 
-<h1>Credit Card Spending Analysis</h1>
+@{
+    var largestCategory = Model.Summary.ByCategory.OrderByDescending(x => x.Value.TotalSpent).FirstOrDefault();
+    var highestMonth = Model.Summary.MonthlyTotals.OrderByDescending(x => x.Value.TotalSpent).FirstOrDefault();
+    var averageMonthlySpend = Model.Summary.MonthlyTotals.Count == 0
+        ? 0m
+        : Model.Summary.TotalSpent / Model.Summary.MonthlyTotals.Count;
+    var categories = Model.Summary.ByCategory.Keys.OrderBy(category => category).ToList();
+    var detailTransactions = Model.Transactions
+        .Where(transaction => transaction.Debit > 0)
+        .Select(transaction => new
+        {
+            Month = transaction.TransactionDate.ToString("yyyy-MM"),
+            Category = transaction.EffectiveCategory,
+            Date = transaction.TransactionDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture),
+            Merchant = transaction.Description,
+            Amount = transaction.Debit,
+            OriginalCategory = transaction.Category
+        });
+}
 
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Total Spent</h5>
-                <p class="display-6 mb-0">@Model.Summary.TotalSpent.ToString("C")</p>
-            </div>
-        </div>
+<div class="analysis-heading">
+    <div>
+        <p class="eyebrow mb-1">Spending overview</p>
+        <h1 class="mb-0">Credit card analysis</h1>
     </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Months Tracked</h5>
-                <p class="display-6 mb-0">@Model.Summary.MonthlyTotals.Count</p>
-            </div>
-        </div>
+    <span class="analysis-period">@Model.Summary.MonthlyTotals.Count months tracked</span>
+</div>
+
+<div class="headline-strip mb-4">
+    <div>
+        <span>Total spent</span>
+        <strong>@Model.Summary.TotalSpent.ToString("C")</strong>
     </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Largest Category</h5>
-                <p class="display-6 mb-0">@Model.Summary.ByCategory.OrderByDescending(x => x.Value.TotalSpent).FirstOrDefault().Key</p>
-            </div>
-        </div>
+    <div>
+        <span>Monthly average</span>
+        <strong>@averageMonthlySpend.ToString("C")</strong>
+    </div>
+    <div>
+        <span>Largest category</span>
+        <strong>@(largestCategory.Key ?? "-")</strong>
+    </div>
+    <div>
+        <span>Highest month</span>
+        <strong>@(highestMonth.Key is null ? "-" : DateTime.ParseExact(highestMonth.Key, "yyyy-MM", CultureInfo.InvariantCulture).ToString("MMMM yyyy", CultureInfo.InvariantCulture))</strong>
     </div>
 </div>
 
-<div class="card mb-4">
+<section class="analysis-section mb-4">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow mb-1">Monthly comparison</p>
+            <h2>Spending by category each month</h2>
+        </div>
+        <span class="text-muted small">Select a value to inspect transactions</span>
+    </div>
     <div class="card-body">
-        <h5 class="card-title">Custom category rules</h5>
-        <p class="text-muted small mb-3">Merchant names are matched against these rules before the category totals are grouped.</p>
-        <table class="table table-sm mb-0">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Keywords</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var rule in Model.CategoryRules)
-                {
-                    <tr>
-                        <td>@rule.Name</td>
-                        <td>@string.Join(", ", rule.Keywords)</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">By Month</h5>
-                <table class="table table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th>Month</th>
-                            <th class="text-end">Spent</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var month in Model.Summary.MonthlyTotals.OrderByDescending(x => x.Key))
-                        {
-                            <tr>
-                                <td>@month.Key</td>
-                                <td class="text-end">@month.Value.TotalSpent.ToString("C")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">By Category</h5>
-                <table class="table table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th class="text-end">Spent</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var category in Model.Summary.ByCategory.OrderByDescending(x => x.Value.TotalSpent))
-                        {
-                            <tr>
-                                <td>@category.Key</td>
-                                <td class="text-end">@category.Value.TotalSpent.ToString("C")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">By Merchant</h5>
-                <table class="table table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th>Merchant</th>
-                            <th class="text-end">Spent</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var merchant in Model.Summary.ByMerchant.OrderByDescending(x => x.Value.TotalSpent).Take(10))
-                        {
-                            <tr>
-                                <td>@merchant.Key</td>
-                                <td class="text-end">@merchant.Value.TotalSpent.ToString("C")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title">Spending by category each month</h5>
         <div class="table-responsive">
-            <table class="table table-sm mb-0">
+            <table class="table analysis-matrix mb-0">
                 <thead>
                     <tr>
                         <th>Month</th>
-                        @foreach (var category in Model.Summary.ByCategory.Keys.OrderBy(category => category))
+                        @foreach (var category in categories)
                         {
                             <th class="text-end">@category</th>
                         }
@@ -151,10 +75,19 @@
                     {
                         <tr>
                             <th>@DateTime.ParseExact(month.Key, "yyyy-MM", CultureInfo.InvariantCulture).ToString("MMMM yyyy", CultureInfo.InvariantCulture)</th>
-                            @foreach (var category in Model.Summary.ByCategory.Keys.OrderBy(category => category))
+                            @foreach (var category in categories)
                             {
-                                <td class="text-end">
-                                    @(month.Value.TryGetValue(category, out var group) ? group.TotalSpent.ToString("C") : "-")
+                                <td class="text-end matrix-value">
+                                    @if (month.Value.TryGetValue(category, out var group))
+                                    {
+                                        <button class="matrix-button" type="button" data-detail-month="@month.Key" data-detail-category="@category" data-bs-toggle="offcanvas" data-bs-target="#transaction-detail" aria-label="View @category spending for @month.Key">
+                                            @group.TotalSpent.ToString("C")
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
                                 </td>
                             }
                             <th class="text-end">@Model.Summary.MonthlyTotals[month.Key].TotalSpent.ToString("C")</th>
@@ -162,6 +95,40 @@
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+</section>
+
+<div class="accordion mb-4" id="supporting-analysis">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="supporting-analysis-heading">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#supporting-analysis-body" aria-expanded="false" aria-controls="supporting-analysis-body">
+                Supporting breakdowns
+            </button>
+        </h2>
+        <div id="supporting-analysis-body" class="accordion-collapse collapse" aria-labelledby="supporting-analysis-heading">
+            <div class="accordion-body">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h3 class="h5">Categories</h3>
+                        <table class="table table-sm">
+                            @foreach (var category in Model.Summary.ByCategory.OrderByDescending(x => x.Value.TotalSpent))
+                            {
+                                <tr><td>@category.Key</td><td class="text-end">@category.Value.TotalSpent.ToString("C")</td></tr>
+                            }
+                        </table>
+                    </div>
+                    <div class="col-lg-6">
+                        <h3 class="h5">Top merchants</h3>
+                        <table class="table table-sm">
+                            @foreach (var merchant in Model.Summary.ByMerchant.OrderByDescending(x => x.Value.TotalSpent).Take(10))
+                            {
+                                <tr><td>@merchant.Key</td><td class="text-end">@merchant.Value.TotalSpent.ToString("C")</td></tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -205,3 +172,22 @@
         </table>
     </div>
 </div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="transaction-detail" aria-labelledby="transaction-detail-title">
+    <div class="offcanvas-header">
+        <div>
+            <p class="eyebrow mb-1">Transaction detail</p>
+            <h2 class="offcanvas-title" id="transaction-detail-title">Category spending</h2>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="detail-total mb-4">
+            <span id="transaction-detail-count">0 transactions</span>
+            <strong id="transaction-detail-total">$0.00</strong>
+        </div>
+        <div id="transaction-detail-list" class="detail-list"></div>
+    </div>
+</div>
+
+<script id="transaction-detail-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(detailTransactions))</script>

@@ -21,9 +21,7 @@ C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\rjsmcshtml.dswa.cach
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\scopedcss\bundle\AnalyzeCC2026.styles.css
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\scopedcss\projectbundle\AnalyzeCC2026.bundle.scp.css
-C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\kicukb0dkp-b9sayid5wm.gz
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\mdc4vporn7-61n19gt1b8.gz
-C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\lxzs5l121y-xtxxf3hu2r.gz
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\6hgyt2gkrq-bqjiyaj88i.gz
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\o4dgjrvvtc-c2jlpeoesf.gz
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\aq68t883sc-erw9l3u2r3.gz
@@ -98,3 +96,5 @@ C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\CsvHelper.dll
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeCC2026.csproj.AssemblyReference.cache
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeC.A81C0102.Up2Date
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeCC2026.sourcelink.json
+C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\lxzs5l121y-pqbbmhbjlb.gz
+C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\kicukb0dkp-fk5ef127xb.gz
