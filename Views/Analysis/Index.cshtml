@@ -1,3 +1,4 @@
+@using System.Globalization
 @model CreditCardAnalyzer.Models.AnalysisViewModel
 
 <h1>Credit Card Spending Analysis</h1>
@@ -126,6 +127,41 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Spending by category each month</h5>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        @foreach (var category in Model.Summary.ByCategory.Keys.OrderBy(category => category))
+                        {
+                            <th class="text-end">@category</th>
+                        }
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var month in Model.Summary.ByMonthAndCategory.OrderByDescending(month => month.Key))
+                    {
+                        <tr>
+                            <th>@DateTime.ParseExact(month.Key, "yyyy-MM", CultureInfo.InvariantCulture).ToString("MMMM yyyy", CultureInfo.InvariantCulture)</th>
+                            @foreach (var category in Model.Summary.ByCategory.Keys.OrderBy(category => category))
+                            {
+                                <td class="text-end">
+                                    @(month.Value.TryGetValue(category, out var group) ? group.TotalSpent.ToString("C") : "-")
+                                </td>
+                            }
+                            <th class="text-end">@Model.Summary.MonthlyTotals[month.Key].TotalSpent.ToString("C")</th>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

@@ -59,6 +59,7 @@ namespace CreditCardAnalyzer.Services
 
                 AddToGroup(summary.MonthlyTotals, monthKey, transaction);
                 AddToGroup(summary.ByMonth, monthKey, transaction);
+                AddToNestedGroup(summary.ByMonthAndCategory, monthKey, categoryKey, transaction);
                 AddToGroup(summary.ByCategory, categoryKey, transaction);
                 AddToGroup(summary.ByMerchant, transaction.Description, transaction);
             }
@@ -98,6 +99,21 @@ namespace CreditCardAnalyzer.Services
             }
 
             group.Add(transaction);
+        }
+
+        private static void AddToNestedGroup(
+            Dictionary<string, Dictionary<string, TransactionGroup>> groups,
+            string outerKey,
+            string innerKey,
+            Transaction transaction)
+        {
+            if (!groups.TryGetValue(outerKey, out var categoryGroups))
+            {
+                categoryGroups = new Dictionary<string, TransactionGroup>();
+                groups[outerKey] = categoryGroups;
+            }
+
+            AddToGroup(categoryGroups, innerKey, transaction);
         }
 
         private class TransactionMap : ClassMap<Transaction>
