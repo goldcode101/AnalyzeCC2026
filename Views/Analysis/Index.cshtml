@@ -29,6 +29,30 @@
     </div>
 </div>
 
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Custom category rules</h5>
+        <p class="text-muted small mb-3">Merchant names are matched against these rules before the category totals are grouped.</p>
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Keywords</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var rule in Model.CategoryRules)
+                {
+                    <tr>
+                        <td>@rule.Name</td>
+                        <td>@string.Join(", ", rule.Keywords)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="row g-4">
     <div class="col-lg-4">
         <div class="card h-100">
@@ -118,7 +142,8 @@
                     <th>Transaction Date</th>
                     <th>Posted Date</th>
                     <th>Description</th>
-                    <th>Category</th>
+                    <th>Original Category</th>
+                    <th>Custom Category</th>
                     <th>Debit</th>
                     <th>Credit</th>
                     <th>Net Amount</th>
@@ -132,6 +157,7 @@
                         <td>@transaction.PostedDate.ToShortDateString()</td>
                         <td>@transaction.Description</td>
                         <td>@transaction.Category</td>
+                        <td>@transaction.EffectiveCategory</td>
                         <td>@transaction.Debit.ToString("C")</td>
                         <td>@transaction.Credit.ToString("C")</td>
                         <td style="color: @(transaction.NetAmount >= 0 ? "green" : "red")">

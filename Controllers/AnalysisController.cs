@@ -8,21 +8,29 @@ namespace CreditCardAnalyzer.Controllers
     public class AnalysisController : Controller
     {
         private readonly TransactionService _transactionService;
+        private readonly IConfiguration _configuration;
 
-        public AnalysisController(TransactionService transactionService)
+        public AnalysisController(TransactionService transactionService, IConfiguration configuration)
         {
             _transactionService = transactionService;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
         {
             var transactions = _transactionService.ImportTransactions();
-            var summary = TransactionService.BuildAnalysisSummary(transactions);
+            var categoryRules = _configuration
+                .GetSection("CustomCategoryRules")
+                .Get<List<CategoryRule>>() ?? new List<CategoryRule>();
+
+            var enrichedTransactions = TransactionService.ApplyCustomCategoryRules(transactions, categoryRules);
+            var summary = TransactionService.BuildAnalysisSummary(enrichedTransactions, categoryRules);
 
             var viewModel = new AnalysisViewModel
             {
-                Transactions = transactions,
-                Summary = summary
+                Transactions = enrichedTransactions,
+                Summary = summary,
+                CategoryRules = categoryRules
             };
 
             return View(viewModel);

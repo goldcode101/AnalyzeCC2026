@@ -9,9 +9,10 @@ namespace CreditCardAnalyzer.Models
     {
         public DateTime TransactionDate { get; set; }
         public DateTime PostedDate { get; set; }
-        public string CardNo { get; set; } // Mask this for security!
-        public string Description { get; set; }
-        public string Category { get; set; }
+        public string CardNo { get; set; } = string.Empty; // Mask this for security!
+        public string Description { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string EffectiveCategory { get; set; } = string.Empty;
         public decimal Debit { get; set; }
         public decimal Credit { get; set; }
 
@@ -37,10 +38,17 @@ namespace CreditCardAnalyzer.Models
         public decimal TotalSpent => MonthlyTotals.Values.Sum(group => group.TotalSpent);
     }
 
+    public class CategoryRule
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<string> Keywords { get; set; } = new();
+    }
+
     public class AnalysisViewModel
     {
         public List<Transaction> Transactions { get; set; } = new();
         public AnalysisSummary Summary { get; set; } = new();
+        public List<CategoryRule> CategoryRules { get; set; } = new();
     }
 }
 

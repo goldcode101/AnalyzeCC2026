@@ -26,24 +26,70 @@ namespace CreditCardAnalyzer.Services
             }
         }
 
-        public static AnalysisSummary BuildAnalysisSummary(IEnumerable<Transaction> transactions)
+        public static List<Transaction> ApplyCustomCategoryRules(IEnumerable<Transaction> transactions,
+        IEnumerable<CategoryRule>? rules = null)
+        {
+            var categoryRules = rules?.ToList() ?? new List<CategoryRule>();
+            var results = new List<Transaction>();
+
+            foreach (var transaction in transactions)
+            {
+                var effectiveCategory = ResolveCustomCategory(transaction.Description, categoryRules);
+                transaction.EffectiveCategory = string.IsNullOrWhiteSpace(effectiveCategory)
+                    ? transaction.Category
+                    : effectiveCategory;
+                results.Add(transaction);
+            }
+
+            return results;
+        }
+
+        public static AnalysisSummary BuildAnalysisSummary(IEnumerable<Transaction> transactions,
+        IEnumerable<CategoryRule>? rules = null)
         {
             var summary = new AnalysisSummary();
+            var categoryRules = rules?.ToList() ?? new List<CategoryRule>();
 
-            foreach (var transaction in transactions.Where(t => t.Debit > 0))
+            foreach (var transaction in ApplyCustomCategoryRules(transactions, categoryRules).Where(t => t.Debit > 0))
             {
                 var monthKey = transaction.TransactionDate.ToString("yyyy-MM");
+                var categoryKey = string.IsNullOrWhiteSpace(transaction.EffectiveCategory)
+                    ? transaction.Category
+                    : transaction.EffectiveCategory;
 
                 AddToGroup(summary.MonthlyTotals, monthKey, transaction);
                 AddToGroup(summary.ByMonth, monthKey, transaction);
-                AddToGroup(summary.ByCategory, transaction.Category, transaction);
+                AddToGroup(summary.ByCategory, categoryKey, transaction);
                 AddToGroup(summary.ByMerchant, transaction.Description, transaction);
             }
 
             return summary;
         }
 
-        private static void AddToGroup(Dictionary<string, TransactionGroup> groups, string key, Transaction transaction)
+        private static string ResolveCustomCategory(string merchantName,
+        IEnumerable<CategoryRule> categoryRules)
+        {
+            var normalizedMerchant = merchantName ?? string.Empty;
+
+            foreach (var rule in categoryRules)
+            {
+                foreach (var keyword in rule.Keywords)
+                {
+                    if (!string.IsNullOrWhiteSpace(keyword) &&
+                        normalizedMerchant.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return rule.Name;
+                    }
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static void AddToGroup(Dictionary<string,
+        TransactionGroup> groups,
+        string key,
+        Transaction transaction)
         {
             if (!groups.TryGetValue(key, out var group))
             {
