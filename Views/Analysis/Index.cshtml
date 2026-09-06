@@ -10,18 +10,19 @@
         : Model.Summary.TotalSpent / Model.Summary.MonthlyTotals.Count;
     var categories = Model.Summary.ByCategory.Keys.OrderBy(category => category).ToList();
     var merchants = Model.Summary.ByMerchant
-        .OrderByDescending(merchant => merchant.Value.TotalSpent)
+        .OrderBy(merchant => merchant.Key, StringComparer.OrdinalIgnoreCase)
         .Select(merchant => merchant.Key)
         .ToList();
     var detailTransactions = Model.Transactions
-        .Where(transaction => transaction.Debit > 0)
+        .Where(transaction => transaction.Debit > 0 || transaction.Credit > 0)
         .Select(transaction => new
         {
             Month = transaction.TransactionDate.ToString("yyyy-MM"),
             Category = transaction.EffectiveCategory,
             Date = transaction.TransactionDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture),
             Merchant = transaction.Description,
-            Amount = transaction.Debit,
+            Amount = transaction.NetAmount,
+            IsRefund = transaction.Credit > 0,
             OriginalCategory = transaction.Category
         });
 }
@@ -119,7 +120,7 @@
                 <button class="merchant-item" type="button" data-merchant="@merchant" role="listitem" aria-label="View details for @merchant">
                     <span class="merchant-item-name">@merchant</span>
                     <span class="merchant-item-meta">@merchantGroup.Count transaction@(merchantGroup.Count == 1 ? "" : "s")</span>
-                    <strong>@merchantGroup.TotalSpent.ToString("C")</strong>
+                    <strong>@merchantGroup.TotalNet.ToString("C")</strong>
                 </button>
             }
         </div>

@@ -67,11 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		matches.forEach((transaction) => {
 			const row = document.createElement('div');
 			row.className = 'detail-row';
+			if (transaction.IsRefund) {
+				row.classList.add('refund-row');
+			}
 			const description = document.createElement('div');
 			const date = document.createElement('strong');
 			date.textContent = transaction.Date;
 			const metadata = document.createElement('small');
-			metadata.textContent = transaction.Category;
+			metadata.textContent = `${transaction.Category}${transaction.IsRefund ? ' | Refund' : ''}`;
 			description.append(date, metadata);
 			const amount = document.createElement('strong');
 			amount.textContent = currency.format(transaction.Amount);
@@ -104,6 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		matches.forEach((transaction) => {
 			const row = document.createElement('div');
 			row.className = 'detail-row';
+			if (transaction.IsRefund) {
+				row.classList.add('refund-row');
+			}
 
 			const description = document.createElement('div');
 			const transactionMerchant = document.createElement('strong');

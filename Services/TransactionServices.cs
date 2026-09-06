@@ -50,7 +50,9 @@ namespace CreditCardAnalyzer.Services
             var summary = new AnalysisSummary();
             var categoryRules = rules?.ToList() ?? new List<CategoryRule>();
 
-            foreach (var transaction in ApplyCustomCategoryRules(transactions, categoryRules).Where(t => t.Debit > 0))
+            var enrichedTransactions = ApplyCustomCategoryRules(transactions, categoryRules).ToList();
+
+            foreach (var transaction in enrichedTransactions.Where(t => t.Debit > 0))
             {
                 var monthKey = transaction.TransactionDate.ToString("yyyy-MM");
                 var categoryKey = string.IsNullOrWhiteSpace(transaction.EffectiveCategory)
@@ -60,8 +62,13 @@ namespace CreditCardAnalyzer.Services
                 AddToGroup(summary.MonthlyTotals, monthKey, transaction);
                 AddToGroup(summary.ByMonth, monthKey, transaction);
                 AddToNestedGroup(summary.ByMonthAndCategory, monthKey, categoryKey, transaction);
-                AddToNestedGroup(summary.ByMonthAndMerchant, monthKey, transaction.Description, transaction);
                 AddToGroup(summary.ByCategory, categoryKey, transaction);
+            }
+
+            foreach (var transaction in enrichedTransactions.Where(t => t.Debit > 0 || t.Credit > 0))
+            {
+                var monthKey = transaction.TransactionDate.ToString("yyyy-MM");
+                AddToNestedGroup(summary.ByMonthAndMerchant, monthKey, transaction.Description, transaction);
                 AddToGroup(summary.ByMerchant, transaction.Description, transaction);
             }
 

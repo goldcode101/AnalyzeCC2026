@@ -483,6 +483,17 @@ code {
   padding-bottom: .75rem;
 }
 
+.refund-row {
+  background: #183c32;
+  border-left: 3px solid #7bd3a8;
+  border-bottom-color: #39745b;
+  padding: .65rem .75rem;
+}
+
+.refund-row strong:last-child {
+  color: #a9efc5;
+}
+
 .detail-row small {
   color: #91a5b9;
   display: block;
