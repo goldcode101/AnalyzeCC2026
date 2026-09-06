@@ -24,7 +24,7 @@ namespace CreditCardAnalyzer.Models
     {
         public string Name { get; set; } = string.Empty;
 
-        public decimal TotalSpent => this.Sum(t => t.Debit);
+        public decimal TotalSpent => this.Sum(t => t.NetAmount);
         public decimal TotalCredits => this.Sum(t => t.Credit);
         public decimal TotalNet => this.Sum(t => t.NetAmount);
     }

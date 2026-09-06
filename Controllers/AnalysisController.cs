@@ -22,9 +22,15 @@ namespace CreditCardAnalyzer.Controllers
             var categoryRules = _configuration
                 .GetSection("CustomCategoryRules")
                 .Get<List<CategoryRule>>() ?? new List<CategoryRule>();
+            var excludedCreditKeywords = _configuration
+                .GetSection("ExcludedCreditKeywords")
+                .Get<List<string>>() ?? new List<string>();
 
             var enrichedTransactions = TransactionService.ApplyCustomCategoryRules(transactions, categoryRules);
-            var summary = TransactionService.BuildAnalysisSummary(enrichedTransactions, categoryRules);
+            var summary = TransactionService.BuildAnalysisSummary(
+                enrichedTransactions,
+                categoryRules,
+                excludedCreditKeywords);
 
             var viewModel = new AnalysisViewModel
             {

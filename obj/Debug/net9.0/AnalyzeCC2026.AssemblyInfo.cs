@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AnalyzeCC2026")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5cbeaf9413b11da2205047524bcf8902d9994789")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8f0c12bedba11dc9ff13df95e6c707d6dc482261")]
 [assembly: System.Reflection.AssemblyProductAttribute("AnalyzeCC2026")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AnalyzeCC2026")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

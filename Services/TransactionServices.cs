@@ -45,14 +45,16 @@ namespace CreditCardAnalyzer.Services
         }
 
         public static AnalysisSummary BuildAnalysisSummary(IEnumerable<Transaction> transactions,
-        IEnumerable<CategoryRule>? rules = null)
+        IEnumerable<CategoryRule>? rules = null,
+        IEnumerable<string>? excludedCreditKeywords = null)
         {
             var summary = new AnalysisSummary();
             var categoryRules = rules?.ToList() ?? new List<CategoryRule>();
+            var excludedKeywords = excludedCreditKeywords?.ToList() ?? new List<string>();
 
             var enrichedTransactions = ApplyCustomCategoryRules(transactions, categoryRules).ToList();
 
-            foreach (var transaction in enrichedTransactions.Where(t => t.Debit > 0))
+            foreach (var transaction in enrichedTransactions.Where(t => IsIncludedInSpendingTotals(t, excludedKeywords)))
             {
                 var monthKey = transaction.TransactionDate.ToString("yyyy-MM");
                 var categoryKey = string.IsNullOrWhiteSpace(transaction.EffectiveCategory)
@@ -73,6 +75,27 @@ namespace CreditCardAnalyzer.Services
             }
 
             return summary;
+        }
+
+        private static bool IsIncludedInSpendingTotals(
+            Transaction transaction,
+            IEnumerable<string> excludedCreditKeywords)
+        {
+            if (transaction.Debit > 0)
+            {
+                return true;
+            }
+
+            if (transaction.Credit <= 0)
+            {
+                return false;
+            }
+
+            return !excludedCreditKeywords.Any(keyword =>
+                !string.IsNullOrWhiteSpace(keyword) &&
+                (transaction.Description ?? string.Empty).Contains(
+                    keyword,
+                    StringComparison.OrdinalIgnoreCase));
         }
 
         private static string ResolveCustomCategory(string merchantName,
