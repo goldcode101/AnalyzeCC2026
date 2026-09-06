@@ -60,6 +60,7 @@ namespace CreditCardAnalyzer.Services
                 AddToGroup(summary.MonthlyTotals, monthKey, transaction);
                 AddToGroup(summary.ByMonth, monthKey, transaction);
                 AddToNestedGroup(summary.ByMonthAndCategory, monthKey, categoryKey, transaction);
+                AddToNestedGroup(summary.ByMonthAndMerchant, monthKey, transaction.Description, transaction);
                 AddToGroup(summary.ByCategory, categoryKey, transaction);
                 AddToGroup(summary.ByMerchant, transaction.Description, transaction);
             }

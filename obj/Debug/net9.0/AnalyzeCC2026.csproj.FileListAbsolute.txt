@@ -2,7 +2,6 @@ C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\appsettings.Developm
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\appsettings.json
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.staticwebassets.runtime.json
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.staticwebassets.endpoints.json
-C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.exe
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.deps.json
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.runtimeconfig.json
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.dll
@@ -96,5 +95,6 @@ C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\CsvHelper.dll
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeCC2026.csproj.AssemblyReference.cache
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeC.A81C0102.Up2Date
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeCC2026.sourcelink.json
-C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\lxzs5l121y-pqbbmhbjlb.gz
-C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\kicukb0dkp-jlm3zvq0xx.gz
+C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.exe
+C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\kicukb0dkp-xeh4r9giet.gz
+C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\lxzs5l121y-j13vujdrd8.gz

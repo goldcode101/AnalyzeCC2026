@@ -9,6 +9,10 @@
         ? 0m
         : Model.Summary.TotalSpent / Model.Summary.MonthlyTotals.Count;
     var categories = Model.Summary.ByCategory.Keys.OrderBy(category => category).ToList();
+    var merchants = Model.Summary.ByMerchant
+        .OrderByDescending(merchant => merchant.Value.TotalSpent)
+        .Select(merchant => merchant.Key)
+        .ToList();
     var detailTransactions = Model.Transactions
         .Where(transaction => transaction.Debit > 0)
         .Select(transaction => new
@@ -99,6 +103,53 @@
     </div>
 </section>
 
+<section class="analysis-section merchant-explorer mb-4">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow mb-1">Merchant detail</p>
+            <h2>Explore merchants</h2>
+        </div>
+        <span class="text-muted small">Select a merchant to see its transactions</span>
+    </div>
+    <div class="merchant-layout">
+        <div class="merchant-list" role="list" aria-label="Merchants">
+            @foreach (var merchant in merchants)
+            {
+                var merchantGroup = Model.Summary.ByMerchant[merchant];
+                <button class="merchant-item" type="button" data-merchant="@merchant" role="listitem" aria-label="View details for @merchant">
+                    <span class="merchant-item-name">@merchant</span>
+                    <span class="merchant-item-meta">@merchantGroup.Count transaction@(merchantGroup.Count == 1 ? "" : "s")</span>
+                    <strong>@merchantGroup.TotalSpent.ToString("C")</strong>
+                </button>
+            }
+        </div>
+        <div class="merchant-detail" id="merchant-detail" aria-live="polite">
+            <div class="merchant-empty-state" id="merchant-empty-state">
+                <p class="eyebrow mb-2">Merchant snapshot</p>
+                <h3>Select a merchant</h3>
+                <p class="text-muted mb-0">Choose a merchant to view monthly totals and every transaction.</p>
+            </div>
+            <div id="merchant-detail-content" hidden>
+                <div class="merchant-detail-heading">
+                    <div>
+                        <p class="eyebrow mb-1">Selected merchant</p>
+                        <h3 id="merchant-detail-name"></h3>
+                    </div>
+                    <div class="merchant-detail-total">
+                        <span id="merchant-detail-count"></span>
+                        <strong id="merchant-detail-total"></strong>
+                    </div>
+                </div>
+                <div id="merchant-months" class="merchant-months"></div>
+                <div>
+                    <p class="eyebrow mb-2">Transactions</p>
+                    <div id="merchant-detail-list" class="detail-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <div class="accordion mb-4" id="supporting-analysis">
     <div class="accordion-item">
         <h2 class="accordion-header" id="supporting-analysis-heading">
@@ -177,7 +228,7 @@
     <div class="offcanvas-header">
         <div>
             <p class="eyebrow mb-1">Transaction detail</p>
-            <h2 class="offcanvas-title" id="transaction-detail-title">Category spending</h2>
+            <h2 class="offcanvas-title" id="transaction-detail-title">Transaction detail</h2>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>

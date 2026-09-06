@@ -318,6 +318,140 @@ code {
   transform: translateY(-1px);
 }
 
+.merchant-layout {
+  display: grid;
+  grid-template-columns: minmax(15rem, .8fr) minmax(0, 1.7fr);
+  gap: 1.5rem;
+}
+
+.merchant-list {
+  border-right: 1px solid #2f4d6b;
+  display: grid;
+  align-content: start;
+  gap: .4rem;
+  max-height: 34rem;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.merchant-item {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #d9e2ec;
+  cursor: pointer;
+  display: grid;
+  gap: .2rem;
+  padding: .75rem;
+  text-align: left;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.merchant-item:hover,
+.merchant-item:focus-visible,
+.merchant-item.is-selected {
+  background: #1c3855;
+  border-color: #416784;
+}
+
+.merchant-item-name {
+  color: #f1f6fb;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.merchant-item-meta {
+  color: #91a5b9;
+  font-size: .8rem;
+}
+
+.merchant-item strong {
+  color: #d9fbf5;
+  font-size: .95rem;
+}
+
+.merchant-detail {
+  min-width: 0;
+}
+
+.merchant-empty-state {
+  border: 1px dashed #416784;
+  padding: 2rem;
+  text-align: center;
+}
+
+.merchant-empty-state h3,
+.merchant-detail-heading h3 {
+  color: #f1f6fb;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.merchant-detail-heading {
+  align-items: start;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.merchant-detail-total {
+  display: grid;
+  gap: .15rem;
+  text-align: right;
+}
+
+.merchant-detail-total span {
+  color: #91a5b9;
+  font-size: .85rem;
+}
+
+.merchant-detail-total strong {
+  color: #f1f6fb;
+  font-size: 1.5rem;
+}
+
+.merchant-months {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: .5rem;
+  margin-bottom: 1.5rem;
+}
+
+.merchant-month {
+  background: #132235;
+  border-left: 3px solid #68c5c0;
+  border-bottom: 1px solid transparent;
+  border-right: 1px solid transparent;
+  border-top: 1px solid transparent;
+  color: #d9e2ec;
+  cursor: pointer;
+  display: grid;
+  gap: .25rem;
+  padding: .65rem .75rem;
+  text-align: left;
+  transition: background-color .15s ease, border-color .15s ease;
+  width: 100%;
+}
+
+.merchant-month:hover,
+.merchant-month:focus-visible,
+.merchant-month.is-selected {
+  background: #1c3855;
+  border-color: #68c5c0;
+}
+
+.merchant-month span {
+  color: #91a5b9;
+  font-size: .8rem;
+}
+
+.merchant-month strong {
+  color: #eaf4fb;
+}
+
 .detail-total {
   border-bottom: 1px solid #2f4d6b;
   display: flex;
@@ -387,6 +521,18 @@ code {
 
   .headline-strip div:nth-child(2) {
     border-right: 0;
+  }
+
+  .merchant-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .merchant-list {
+    border-bottom: 1px solid #2f4d6b;
+    border-right: 0;
+    max-height: 18rem;
+    padding-bottom: 1rem;
+    padding-right: 0;
   }
 }
 

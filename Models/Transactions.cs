@@ -33,6 +33,7 @@ namespace CreditCardAnalyzer.Models
         public Dictionary<string, TransactionGroup> MonthlyTotals { get; } = new();
         public Dictionary<string, TransactionGroup> ByMonth { get; } = new();
         public Dictionary<string, Dictionary<string, TransactionGroup>> ByMonthAndCategory { get; } = new();
+        public Dictionary<string, Dictionary<string, TransactionGroup>> ByMonthAndMerchant { get; } = new();
         public Dictionary<string, TransactionGroup> ByCategory { get; } = new();
         public Dictionary<string, TransactionGroup> ByMerchant { get; } = new();
 
