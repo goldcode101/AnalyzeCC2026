@@ -53,42 +53,13 @@ namespace CreditCardAnalyzer.Controllers
                 return NotFound();
             }
 
-            var transactions = _analysisDataService.Transactions;
-            var summary = _analysisDataService.Summary;
-            var excludedCreditKeywords = _analysisDataService.ExcludedCreditKeywords;
-
-            if (!summary.ByMonthAndMerchant.ContainsKey(month))
+            var monthlySummary = _analysisDataService.GetMonthlySummary(month);
+            if (monthlySummary is null)
             {
                 return NotFound();
             }
 
-            var spending = summary.MonthlyTotals.TryGetValue(month, out var monthlySpending)
-                ? monthlySpending
-                : new TransactionGroup { Name = month };
-
-            var monthTransactions = transactions
-                .Where(transaction => transaction.TransactionDate.ToString("yyyy-MM") == month)
-                .ToList();
-            var excludedCredits = monthTransactions
-                .Where(transaction => TransactionService.IsExcludedCreditPayment(transaction, excludedCreditKeywords))
-                .Sum(transaction => transaction.Credit);
-            var qualifyingCredits = monthTransactions
-                .Where(transaction => transaction.Credit > 0 &&
-                    !TransactionService.IsExcludedCreditPayment(transaction, excludedCreditKeywords))
-                .Sum(transaction => transaction.Credit);
-            var categories = summary.ByMonthAndCategory.TryGetValue(month, out var categoryGroups)
-                ? categoryGroups
-                : new Dictionary<string, TransactionGroup>();
-
-            return View(new MonthlySummaryViewModel
-            {
-                MonthKey = month,
-                Spending = spending,
-                Categories = categories,
-                Transactions = monthTransactions,
-                QualifyingCredits = qualifyingCredits,
-                ExcludedCredits = excludedCredits
-            });
+            return View(monthlySummary);
         }
 
     }

@@ -1,9 +1,11 @@
 using CreditCardAnalyzer.Services;
+using CreditCardAnalyzer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<AnalysisOptions>(builder.Configuration);
 
 // Register TransactionService (pass your CSV path)
 builder.Services.AddSingleton(_ =>

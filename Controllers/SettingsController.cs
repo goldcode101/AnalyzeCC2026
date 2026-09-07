@@ -1,24 +1,21 @@
 using CreditCardAnalyzer.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace CreditCardAnalyzer.Controllers
 {
     public class SettingsController : Controller
     {
-        private readonly IConfiguration _configuration;
+        private readonly AnalysisOptions _analysisOptions;
 
-        public SettingsController(IConfiguration configuration)
+        public SettingsController(IOptions<AnalysisOptions> analysisOptions)
         {
-            _configuration = configuration;
+            _analysisOptions = analysisOptions.Value;
         }
 
         public IActionResult Index()
         {
-            var categoryRules = _configuration
-                .GetSection("CustomCategoryRules")
-                .Get<List<CategoryRule>>() ?? new List<CategoryRule>();
-
-            return View(categoryRules);
+            return View(_analysisOptions.CustomCategoryRules);
         }
     }
 }
