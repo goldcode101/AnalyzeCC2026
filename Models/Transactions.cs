@@ -53,5 +53,15 @@ namespace CreditCardAnalyzer.Models
         public AnalysisSummary Summary { get; set; } = new();
         public List<CategoryRule> CategoryRules { get; set; } = new();
     }
+
+    public class MonthlySummaryViewModel
+    {
+        public string MonthKey { get; set; } = string.Empty;
+        public TransactionGroup Spending { get; set; } = new();
+        public Dictionary<string, TransactionGroup> Categories { get; set; } = new();
+        public List<Transaction> Transactions { get; set; } = new();
+        public decimal QualifyingCredits { get; set; }
+        public decimal ExcludedCredits { get; set; }
+    }
 }
 

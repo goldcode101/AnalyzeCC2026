@@ -91,7 +91,14 @@ namespace CreditCardAnalyzer.Services
                 return false;
             }
 
-            return !excludedCreditKeywords.Any(keyword =>
+            return !IsExcludedCreditPayment(transaction, excludedCreditKeywords);
+        }
+
+        public static bool IsExcludedCreditPayment(
+            Transaction transaction,
+            IEnumerable<string> excludedCreditKeywords)
+        {
+            return transaction.Credit > 0 && excludedCreditKeywords.Any(keyword =>
                 !string.IsNullOrWhiteSpace(keyword) &&
                 (transaction.Description ?? string.Empty).Contains(
                     keyword,

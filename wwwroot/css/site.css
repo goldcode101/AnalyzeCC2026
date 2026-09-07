@@ -56,6 +56,21 @@ a:hover {
   border-color: #52667b;
 }
 
+.app-navbar .dropdown-menu {
+  background: #15263b;
+  border-color: #2b4561;
+}
+
+.app-navbar .dropdown-item {
+  color: #d9e2ec;
+}
+
+.app-navbar .dropdown-item:hover,
+.app-navbar .dropdown-item:focus {
+  background: #1c3855;
+  color: #fff;
+}
+
 main {
   min-height: calc(100vh - 170px);
 }

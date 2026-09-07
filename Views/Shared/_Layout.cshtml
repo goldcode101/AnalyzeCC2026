@@ -1,4 +1,9 @@
 ﻿<!DOCTYPE html>
+@using CreditCardAnalyzer.Models
+@using CreditCardAnalyzer.Services
+@using System.Globalization
+@inject TransactionService TransactionService
+@inject IConfiguration Configuration
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -25,6 +30,36 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                        @{
+                            var navigationCategoryRules = Configuration
+                                .GetSection("CustomCategoryRules")
+                                .Get<List<CategoryRule>>() ?? new List<CategoryRule>();
+                            var navigationExcludedCreditKeywords = Configuration
+                                .GetSection("ExcludedCreditKeywords")
+                                .Get<List<string>>() ?? new List<string>();
+                            var navigationTransactions = TransactionService.ApplyCustomCategoryRules(
+                                TransactionService.ImportTransactions(),
+                                navigationCategoryRules);
+                            var navigationSummary = TransactionService.BuildAnalysisSummary(
+                                navigationTransactions,
+                                navigationCategoryRules,
+                                navigationExcludedCreditKeywords);
+                        }
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Monthly summaries
+                            </a>
+                            <ul class="dropdown-menu">
+                                @foreach (var month in navigationSummary.ByMonthAndMerchant.Keys.OrderByDescending(month => month))
+                                {
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Analysis" asp-action="Month" asp-route-month="@month">
+                                            @DateTime.ParseExact(month, "yyyy-MM", CultureInfo.InvariantCulture).ToString("MMMM yyyy", CultureInfo.InvariantCulture)
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Settings" asp-action="Index">Settings</a>
