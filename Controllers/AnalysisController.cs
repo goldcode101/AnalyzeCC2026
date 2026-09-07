@@ -8,25 +8,21 @@ namespace CreditCardAnalyzer.Controllers
 {
     public class AnalysisController : Controller
     {
-        private readonly TransactionService _transactionService;
-        private readonly IConfiguration _configuration;
+        private readonly AnalysisDataService _analysisDataService;
 
-        public AnalysisController(TransactionService transactionService, IConfiguration configuration)
+        public AnalysisController(
+            AnalysisDataService analysisDataService)
         {
-            _transactionService = transactionService;
-            _configuration = configuration;
+            _analysisDataService = analysisDataService;
         }
 
         public IActionResult Index()
         {
-            var categoryRules = GetCategoryRules();
-            var (enrichedTransactions, summary) = LoadAnalysis(categoryRules);
-
             var viewModel = new AnalysisViewModel
             {
-                Transactions = enrichedTransactions,
-                Summary = summary,
-                CategoryRules = categoryRules
+                Transactions = _analysisDataService.Transactions,
+                Summary = _analysisDataService.Summary,
+                CategoryRules = _analysisDataService.CategoryRules
             };
 
             return View(viewModel);
@@ -34,26 +30,19 @@ namespace CreditCardAnalyzer.Controllers
 
         public IActionResult Merchants()
         {
-            var (transactions, summary) = LoadAnalysis();
-
             return View(new MerchantExplorerViewModel
             {
-                Transactions = transactions,
-                Summary = summary
+                Transactions = _analysisDataService.Transactions,
+                Summary = _analysisDataService.Summary
             });
         }
 
         public IActionResult Raw()
         {
-            var categoryRules = GetCategoryRules();
-            var transactions = TransactionService.ApplyCustomCategoryRules(
-                _transactionService.ImportTransactions(),
-                categoryRules);
-
             return View(new RawTransactionsViewModel
             {
-                Transactions = transactions,
-                ExcludedCreditKeywords = GetExcludedCreditKeywords()
+                Transactions = _analysisDataService.Transactions,
+                ExcludedCreditKeywords = _analysisDataService.ExcludedCreditKeywords
             });
         }
 
@@ -64,15 +53,9 @@ namespace CreditCardAnalyzer.Controllers
                 return NotFound();
             }
 
-            var categoryRules = GetCategoryRules();
-            var excludedCreditKeywords = GetExcludedCreditKeywords();
-            var transactions = TransactionService.ApplyCustomCategoryRules(
-                _transactionService.ImportTransactions(),
-                categoryRules);
-            var summary = TransactionService.BuildAnalysisSummary(
-                transactions,
-                categoryRules,
-                excludedCreditKeywords);
+            var transactions = _analysisDataService.Transactions;
+            var summary = _analysisDataService.Summary;
+            var excludedCreditKeywords = _analysisDataService.ExcludedCreditKeywords;
 
             if (!summary.ByMonthAndMerchant.ContainsKey(month))
             {
@@ -108,33 +91,5 @@ namespace CreditCardAnalyzer.Controllers
             });
         }
 
-        private (List<Transaction> Transactions, AnalysisSummary Summary) LoadAnalysis(
-            List<CategoryRule>? categoryRules = null)
-        {
-            categoryRules ??= GetCategoryRules();
-            var transactions = TransactionService.ApplyCustomCategoryRules(
-                _transactionService.ImportTransactions(),
-                categoryRules);
-            var summary = TransactionService.BuildAnalysisSummary(
-                transactions,
-                categoryRules,
-                GetExcludedCreditKeywords());
-
-            return (transactions, summary);
-        }
-
-        private List<CategoryRule> GetCategoryRules()
-        {
-            return _configuration
-                .GetSection("CustomCategoryRules")
-                .Get<List<CategoryRule>>() ?? new List<CategoryRule>();
-        }
-
-        private List<string> GetExcludedCreditKeywords()
-        {
-            return _configuration
-                .GetSection("ExcludedCreditKeywords")
-                .Get<List<string>>() ?? new List<string>();
-        }
     }
 }

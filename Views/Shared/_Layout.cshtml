@@ -2,8 +2,7 @@
 @using CreditCardAnalyzer.Models
 @using CreditCardAnalyzer.Services
 @using System.Globalization
-@inject TransactionService TransactionService
-@inject IConfiguration Configuration
+@inject AnalysisDataService AnalysisDataService
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -41,19 +40,7 @@
                             <a class="nav-link" asp-area="" asp-controller="Analysis" asp-action="Raw">Raw data</a>
                         </li>
                         @{
-                            var navigationCategoryRules = Configuration
-                                .GetSection("CustomCategoryRules")
-                                .Get<List<CategoryRule>>() ?? new List<CategoryRule>();
-                            var navigationExcludedCreditKeywords = Configuration
-                                .GetSection("ExcludedCreditKeywords")
-                                .Get<List<string>>() ?? new List<string>();
-                            var navigationTransactions = TransactionService.ApplyCustomCategoryRules(
-                                TransactionService.ImportTransactions(),
-                                navigationCategoryRules);
-                            var navigationSummary = TransactionService.BuildAnalysisSummary(
-                                navigationTransactions,
-                                navigationCategoryRules,
-                                navigationExcludedCreditKeywords);
+                            var navigationSummary = AnalysisDataService.Summary;
                         }
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

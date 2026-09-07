@@ -9,6 +9,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(_ =>
     new TransactionService("Data/2026-08-26_transaction_download.csv")     //This needs to be path to csv file.
 );
+builder.Services.AddScoped<AnalysisDataService>();
 
 var app = builder.Build();
 
