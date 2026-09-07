@@ -52,7 +52,8 @@ namespace CreditCardAnalyzer.Controllers
 
             return View(new RawTransactionsViewModel
             {
-                Transactions = transactions
+                Transactions = transactions,
+                ExcludedCreditKeywords = GetExcludedCreditKeywords()
             });
         }
 

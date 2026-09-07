@@ -386,6 +386,103 @@ code {
   color: #f1a7a7 !important;
 }
 
+.raw-filter-grid {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1.6fr) repeat(3, minmax(10rem, 1fr));
+  gap: 1rem;
+}
+
+.raw-toolbar .form-label {
+  color: #9eb2c5;
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.raw-toolbar .form-control,
+.raw-toolbar .form-select {
+  background-color: #102035;
+  border-color: #416784;
+  color: #f1f6fb;
+}
+
+.raw-toolbar .form-control::placeholder {
+  color: #91a5b9;
+}
+
+.raw-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.raw-summary div {
+  background: #132235;
+  border-bottom: 2px solid #315878;
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  padding: .8rem 1rem;
+}
+
+.raw-summary span {
+  color: #91a5b9;
+  font-size: .8rem;
+}
+
+.raw-summary strong {
+  color: #eaf4fb;
+  font-size: 1.1rem;
+}
+
+.raw-sort-button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  padding: 0;
+  text-align: inherit;
+  text-transform: inherit;
+}
+
+.raw-sort-button:hover,
+.raw-sort-button:focus-visible,
+.raw-sort-button.is-active {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: #68c5c0;
+  text-underline-offset: .25rem;
+}
+
+.transaction-type {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  display: inline-block;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: .2rem .5rem;
+  white-space: nowrap;
+}
+
+.transaction-type-charge {
+  background: #203b59;
+  border-color: #416784;
+  color: #c6dced;
+}
+
+.transaction-type-credit {
+  background: #183c32;
+  border-color: #39745b;
+  color: #a9efc5;
+}
+
+.transaction-type-card-payment {
+  background: #3b3048;
+  border-color: #735b85;
+  color: #e2c8f0;
+}
+
 .section-heading {
   margin-bottom: 1.25rem;
 }
@@ -665,6 +762,11 @@ code {
 
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+
+  .raw-filter-grid,
+  .raw-summary {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .merchant-list {

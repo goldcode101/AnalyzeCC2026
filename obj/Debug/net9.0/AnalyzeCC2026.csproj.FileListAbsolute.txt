@@ -96,5 +96,5 @@ C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeCC2026.csproj
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeC.A81C0102.Up2Date
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\AnalyzeCC2026.sourcelink.json
 C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\bin\Debug\net9.0\AnalyzeCC2026.exe
-C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\kicukb0dkp-lev82kpnls.gz
-C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\lxzs5l121y-ge6i7ns13f.gz
+C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\kicukb0dkp-c8nslbgabz.gz
+C:\Code\CSharp\AnalyzeCC2026\AnalyzeCC2026\obj\Debug\net9.0\compressed\lxzs5l121y-19ud3l0jf1.gz

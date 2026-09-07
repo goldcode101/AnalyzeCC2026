@@ -63,6 +63,7 @@ namespace CreditCardAnalyzer.Models
     public class RawTransactionsViewModel
     {
         public List<Transaction> Transactions { get; set; } = new();
+        public List<string> ExcludedCreditKeywords { get; set; } = new();
     }
 
     public class MonthlySummaryViewModel

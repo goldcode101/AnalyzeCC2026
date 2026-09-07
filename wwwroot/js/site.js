@@ -15,6 +15,165 @@ document.addEventListener('DOMContentLoaded', () => {
 	const merchantMonths = document.getElementById('merchant-months');
 	const merchantDetailList = document.getElementById('merchant-detail-list');
 	const merchantSearch = document.getElementById('merchant-search');
+	const rawDataElement = document.getElementById('raw-transaction-data');
+	const formatMonth = (month) => new Date(`${month}-01T00:00:00`).toLocaleDateString(undefined, {
+		month: 'long',
+		year: 'numeric'
+	});
+
+	if (rawDataElement) {
+		const rawTransactions = JSON.parse(rawDataElement.textContent || '[]');
+		const rawBody = document.getElementById('raw-transactions-body');
+		const rawSearch = document.getElementById('raw-search');
+		const rawMonth = document.getElementById('raw-month');
+		const rawCategory = document.getElementById('raw-category');
+		const rawType = document.getElementById('raw-type');
+		const rawClear = document.getElementById('raw-clear-filters');
+		const rawResultCount = document.getElementById('raw-result-count');
+		const rawTotalDebit = document.getElementById('raw-total-debit');
+		const rawTotalCredit = document.getElementById('raw-total-credit');
+		const rawTotalExcluded = document.getElementById('raw-total-excluded');
+		const rawTotalNet = document.getElementById('raw-total-net');
+		const rawState = { sort: 'date', descending: true };
+		const rawSortProperties = {
+			date: 'DateValue',
+			postedDate: 'PostedDateValue',
+			description: 'Description',
+			originalCategory: 'OriginalCategory',
+			effectiveCategory: 'EffectiveCategory',
+			debit: 'Debit',
+			credit: 'Credit',
+			netAmount: 'NetAmount'
+		};
+		const rawCurrency = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+
+		const rawTypeFor = (transaction) => transaction.IsExcludedPayment
+			? 'card-payment'
+			: transaction.Credit > 0
+				? 'credit'
+				: 'charge';
+
+		const rawTypeLabel = (type) => ({
+			'card-payment': 'Card payment',
+			credit: 'Credit',
+			charge: 'Charge'
+		}[type]);
+
+		const rawMonthKey = (dateValue) => dateValue.substring(0, 7);
+
+		const addOptions = (select, values, labelFormatter) => {
+			[...new Set(values)].sort().forEach((value) => {
+				const option = document.createElement('option');
+				option.value = value;
+				option.textContent = labelFormatter ? labelFormatter(value) : value;
+				select.append(option);
+			});
+		};
+
+		addOptions(rawMonth, rawTransactions.map((transaction) => rawMonthKey(transaction.DateValue)), (month) => formatMonth(month));
+		addOptions(rawCategory, rawTransactions.map((transaction) => transaction.EffectiveCategory));
+
+		const renderRawTransactions = () => {
+			const query = rawSearch.value.trim().toLocaleLowerCase();
+			const filtered = rawTransactions
+				.filter((transaction) => {
+					const searchable = `${transaction.Description} ${transaction.OriginalCategory} ${transaction.EffectiveCategory}`.toLocaleLowerCase();
+					const type = rawTypeFor(transaction);
+					return (!query || searchable.includes(query)) &&
+						(!rawMonth.value || rawMonthKey(transaction.DateValue) === rawMonth.value) &&
+						(!rawCategory.value || transaction.EffectiveCategory === rawCategory.value) &&
+						(!rawType.value || type === rawType.value);
+				})
+				.sort((first, second) => {
+					const sortProperty = rawSortProperties[rawState.sort];
+					const firstValue = first[sortProperty];
+					const secondValue = second[sortProperty];
+					const comparison = typeof firstValue === 'string'
+						? firstValue.localeCompare(secondValue)
+						: firstValue - secondValue;
+					return rawState.descending ? -comparison : comparison;
+				});
+
+			rawBody.replaceChildren();
+			filtered.forEach((transaction) => {
+				const row = document.createElement('tr');
+				const type = rawTypeFor(transaction);
+				const cells = [
+					transaction.Date,
+					transaction.PostedDate,
+					transaction.Description,
+					transaction.OriginalCategory,
+					transaction.EffectiveCategory,
+					rawCurrency.format(transaction.Debit),
+					rawCurrency.format(transaction.Credit),
+					rawCurrency.format(transaction.NetAmount)
+				];
+
+				cells.forEach((value, index) => {
+					const cell = document.createElement('td');
+					cell.textContent = value;
+					if (index >= 5) {
+						cell.className = `text-end ${index === 7 ? (transaction.NetAmount >= 0 ? 'amount-positive' : 'amount-negative') : ''}`;
+					}
+					row.append(cell);
+				});
+
+				const typeCell = document.createElement('td');
+				const typeBadge = document.createElement('span');
+				typeBadge.className = `transaction-type transaction-type-${type}`;
+				typeBadge.textContent = rawTypeLabel(type);
+				typeCell.append(typeBadge);
+				row.append(typeCell);
+				rawBody.append(row);
+			});
+
+			rawResultCount.textContent = `${filtered.length} of ${rawTransactions.length} records`;
+			rawTotalDebit.textContent = rawCurrency.format(filtered.reduce((sum, transaction) => sum + transaction.Debit, 0));
+			rawTotalCredit.textContent = rawCurrency.format(filtered
+				.filter((transaction) => !transaction.IsExcludedPayment)
+				.reduce((sum, transaction) => sum + transaction.Credit, 0));
+			rawTotalExcluded.textContent = rawCurrency.format(filtered
+				.filter((transaction) => transaction.IsExcludedPayment)
+				.reduce((sum, transaction) => sum + transaction.Credit, 0));
+			rawTotalNet.textContent = rawCurrency.format(filtered
+				.filter((transaction) => !transaction.IsExcludedPayment)
+				.reduce((sum, transaction) => sum + transaction.NetAmount, 0));
+		};
+
+		document.querySelectorAll('[data-raw-sort]').forEach((button) => {
+			button.addEventListener('click', () => {
+				const sort = button.dataset.rawSort;
+				if (rawState.sort === sort) {
+					rawState.descending = !rawState.descending;
+				} else {
+					rawState.sort = sort;
+					rawState.descending = false;
+				}
+				document.querySelectorAll('[data-raw-sort]').forEach((item) => {
+					item.classList.toggle('is-active', item === button);
+					item.setAttribute('aria-sort', item === button ? (rawState.descending ? 'descending' : 'ascending') : 'none');
+				});
+				renderRawTransactions();
+			});
+		});
+
+		[rawSearch, rawMonth, rawCategory, rawType].forEach((control) => {
+			control.addEventListener('input', renderRawTransactions);
+			control.addEventListener('change', renderRawTransactions);
+		});
+
+		rawClear.addEventListener('click', () => {
+			rawSearch.value = '';
+			rawMonth.value = '';
+			rawCategory.value = '';
+			rawType.value = '';
+			rawState.sort = 'date';
+			rawState.descending = true;
+			renderRawTransactions();
+		});
+
+		renderRawTransactions();
+	}
 
 	if (!dataElement) {
 		return;
@@ -22,11 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const transactions = JSON.parse(dataElement.textContent || '[]');
 	const currency = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
-
-	const formatMonth = (month) => new Date(`${month}-01T00:00:00`).toLocaleDateString(undefined, {
-		month: 'long',
-		year: 'numeric'
-	});
 
 	const renderMerchantDetails = (merchant, selectedMonth = null) => {
 		const merchantTransactions = transactions.filter((transaction) => transaction.Merchant === merchant);

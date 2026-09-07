@@ -1,5 +1,23 @@
 @using System.Globalization
+@using System.Text.Json
 @model CreditCardAnalyzer.Models.RawTransactionsViewModel
+
+@{
+    var rawTransactions = Model.Transactions.Select(transaction => new
+    {
+        Date = transaction.TransactionDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture),
+        DateValue = transaction.TransactionDate.ToString("yyyy-MM-dd"),
+        PostedDate = transaction.PostedDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture),
+        PostedDateValue = transaction.PostedDate.ToString("yyyy-MM-dd"),
+        Description = transaction.Description,
+        OriginalCategory = transaction.Category,
+        EffectiveCategory = transaction.EffectiveCategory,
+        Debit = transaction.Debit,
+        Credit = transaction.Credit,
+        NetAmount = transaction.NetAmount,
+        IsExcludedPayment = CreditCardAnalyzer.Services.TransactionService.IsExcludedCreditPayment(transaction, Model.ExcludedCreditKeywords)
+    });
+}
 
 <div class="analysis-heading">
     <div>
@@ -15,38 +33,65 @@
             <p class="eyebrow mb-1">Imported activity</p>
             <h2>All transaction records</h2>
         </div>
-        <span class="text-muted small">@Model.Transactions.Count records</span>
+        <span class="text-muted small" id="raw-result-count">@Model.Transactions.Count records</span>
+    </div>
+
+    <div class="raw-toolbar mb-4">
+        <div class="raw-filter-grid">
+            <div>
+                <label class="form-label" for="raw-search">Search</label>
+                <input class="form-control" id="raw-search" type="search" placeholder="Merchant or category" />
+            </div>
+            <div>
+                <label class="form-label" for="raw-month">Month</label>
+                <select class="form-select" id="raw-month">
+                    <option value="">All months</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="raw-category">Effective category</label>
+                <select class="form-select" id="raw-category">
+                    <option value="">All categories</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="raw-type">Transaction type</label>
+                <select class="form-select" id="raw-type">
+                    <option value="">All types</option>
+                    <option value="charge">Charges</option>
+                    <option value="credit">Credits</option>
+                    <option value="card-payment">Card payments</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-outline-secondary mt-3" id="raw-clear-filters" type="button">Clear filters</button>
+    </div>
+
+    <div class="raw-summary mb-4" aria-live="polite">
+        <div><span>Charges</span><strong id="raw-total-debit">$0.00</strong></div>
+        <div><span>Credits applied</span><strong id="raw-total-credit">$0.00</strong></div>
+        <div><span>Excluded card payments</span><strong id="raw-total-excluded">$0.00</strong></div>
+        <div><span>Net activity</span><strong id="raw-total-net">$0.00</strong></div>
     </div>
 
     <div class="table-responsive">
         <table class="table table-striped table-bordered mb-0 raw-transactions-table">
             <thead>
                 <tr>
-                    <th>Transaction Date</th>
-                    <th>Posted Date</th>
-                    <th>Description</th>
-                    <th>Original Category</th>
-                    <th>Effective Category</th>
-                    <th class="text-end">Debit</th>
-                    <th class="text-end">Credit</th>
-                    <th class="text-end">Net Amount</th>
+                    <th><button class="raw-sort-button" type="button" data-raw-sort="date">Transaction Date</button></th>
+                    <th><button class="raw-sort-button" type="button" data-raw-sort="postedDate">Posted Date</button></th>
+                    <th><button class="raw-sort-button" type="button" data-raw-sort="description">Description</button></th>
+                    <th><button class="raw-sort-button" type="button" data-raw-sort="originalCategory">Original Category</button></th>
+                    <th><button class="raw-sort-button" type="button" data-raw-sort="effectiveCategory">Effective Category</button></th>
+                    <th class="text-end"><button class="raw-sort-button" type="button" data-raw-sort="debit">Debit</button></th>
+                    <th class="text-end"><button class="raw-sort-button" type="button" data-raw-sort="credit">Credit</button></th>
+                    <th class="text-end"><button class="raw-sort-button" type="button" data-raw-sort="netAmount">Net Amount</button></th>
+                    <th>Type</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var transaction in Model.Transactions.OrderByDescending(transaction => transaction.TransactionDate))
-                {
-                    <tr>
-                        <td>@transaction.TransactionDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)</td>
-                        <td>@transaction.PostedDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)</td>
-                        <td>@transaction.Description</td>
-                        <td>@transaction.Category</td>
-                        <td>@transaction.EffectiveCategory</td>
-                        <td class="text-end">@transaction.Debit.ToString("C")</td>
-                        <td class="text-end">@transaction.Credit.ToString("C")</td>
-                        <td class="text-end @(transaction.NetAmount >= 0 ? "amount-positive" : "amount-negative")">@transaction.NetAmount.ToString("C")</td>
-                    </tr>
-                }
-            </tbody>
+            <tbody id="raw-transactions-body"></tbody>
         </table>
     </div>
 </section>
+
+<script id="raw-transaction-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(rawTransactions))</script>
