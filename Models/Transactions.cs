@@ -54,6 +54,17 @@ namespace CreditCardAnalyzer.Models
         public List<CategoryRule> CategoryRules { get; set; } = new();
     }
 
+    public class MerchantExplorerViewModel
+    {
+        public List<Transaction> Transactions { get; set; } = new();
+        public AnalysisSummary Summary { get; set; } = new();
+    }
+
+    public class RawTransactionsViewModel
+    {
+        public List<Transaction> Transactions { get; set; } = new();
+    }
+
     public class MonthlySummaryViewModel
     {
         public string MonthKey { get; set; } = string.Empty;

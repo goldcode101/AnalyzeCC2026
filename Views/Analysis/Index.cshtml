@@ -3,15 +3,16 @@
 @model CreditCardAnalyzer.Models.AnalysisViewModel
 
 @{
-    var largestCategory = Model.Summary.ByCategory.OrderByDescending(x => x.Value.TotalSpent).FirstOrDefault();
     var highestMonth = Model.Summary.MonthlyTotals.OrderByDescending(x => x.Value.TotalSpent).FirstOrDefault();
     var averageMonthlySpend = Model.Summary.MonthlyTotals.Count == 0
         ? 0m
         : Model.Summary.TotalSpent / Model.Summary.MonthlyTotals.Count;
     var categories = Model.Summary.ByCategory.Keys.OrderBy(category => category).ToList();
-    var merchants = Model.Summary.ByMerchant
-        .OrderBy(merchant => merchant.Key, StringComparer.OrdinalIgnoreCase)
-        .Select(merchant => merchant.Key)
+    var totalCredits = Model.Transactions.Sum(transaction => transaction.Credit);
+    var recentTransactions = Model.Transactions
+        .Where(transaction => transaction.Debit > 0 || transaction.Credit > 0)
+        .OrderByDescending(transaction => transaction.TransactionDate)
+        .Take(8)
         .ToList();
     var detailTransactions = Model.Transactions
         .Where(transaction => transaction.Debit > 0 || transaction.Credit > 0)
@@ -32,8 +33,31 @@
         <p class="eyebrow mb-1">Spending overview</p>
         <h1 class="mb-0">Credit card analysis</h1>
     </div>
-    <span class="analysis-period">@Model.Summary.MonthlyTotals.Count months tracked</span>
+        <div class="analysis-heading-actions">
+            <span class="analysis-period">@Model.Summary.MonthlyTotals.Count months tracked</span>
+            <a class="btn btn-outline-secondary btn-sm" asp-controller="Analysis" asp-action="Merchants">Explore merchants</a>
+            <a class="btn btn-outline-secondary btn-sm" asp-controller="Analysis" asp-action="Raw">View raw data</a>
+        </div>
 </div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="transaction-detail" aria-labelledby="transaction-detail-title">
+    <div class="offcanvas-header">
+        <div>
+            <p class="eyebrow mb-1">Transaction detail</p>
+            <h2 class="offcanvas-title" id="transaction-detail-title">Transaction detail</h2>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="detail-total mb-4">
+            <span id="transaction-detail-count">0 transactions</span>
+            <strong id="transaction-detail-total">$0.00</strong>
+        </div>
+        <div id="transaction-detail-list" class="detail-list"></div>
+    </div>
+</div>
+
+<script id="transaction-detail-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(detailTransactions))</script>
 
 <div class="headline-strip mb-4">
     <div>
@@ -45,13 +69,53 @@
         <strong>@averageMonthlySpend.ToString("C")</strong>
     </div>
     <div>
-        <span>Largest category</span>
-        <strong>@(largestCategory.Key ?? "-")</strong>
+        <span>Credits recorded</span>
+        <strong>@totalCredits.ToString("C")</strong>
     </div>
     <div>
         <span>Highest month</span>
         <strong>@(highestMonth.Key is null ? "-" : DateTime.ParseExact(highestMonth.Key, "yyyy-MM", CultureInfo.InvariantCulture).ToString("MMMM yyyy", CultureInfo.InvariantCulture))</strong>
     </div>
+</div>
+
+<div class="dashboard-grid mb-4">
+    <section class="analysis-section dashboard-panel">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow mb-1">Spending trend</p>
+                <h2>Monthly net spending</h2>
+            </div>
+        </div>
+        <div class="dashboard-month-list">
+            @foreach (var month in Model.Summary.MonthlyTotals.OrderByDescending(month => month.Key))
+            {
+                var monthDate = DateTime.ParseExact(month.Key, "yyyy-MM", CultureInfo.InvariantCulture);
+                <a class="dashboard-month-row" asp-controller="Analysis" asp-action="Month" asp-route-month="@month.Key">
+                    <span>@monthDate.ToString("MMM yyyy", CultureInfo.InvariantCulture)</span>
+                    <span class="dashboard-bar"><span style="width: @(Model.Summary.TotalSpent == 0 ? 0 : Math.Min(100, (double)(month.Value.TotalSpent / Model.Summary.TotalSpent * 100)))%"></span></span>
+                    <strong>@month.Value.TotalSpent.ToString("C")</strong>
+                </a>
+            }
+        </div>
+    </section>
+
+    <section class="analysis-section dashboard-panel">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow mb-1">Category overview</p>
+                <h2>Where money goes</h2>
+            </div>
+        </div>
+        <div class="dashboard-category-list">
+            @foreach (var category in Model.Summary.ByCategory.OrderByDescending(category => category.Value.TotalSpent).Take(8))
+            {
+                <div class="dashboard-category-row">
+                    <span>@category.Key</span>
+                    <strong>@category.Value.TotalSpent.ToString("C")</strong>
+                </div>
+            }
+        </div>
+    </section>
 </div>
 
 <section class="analysis-section mb-4">
@@ -104,50 +168,17 @@
     </div>
 </section>
 
-<section class="analysis-section merchant-explorer mb-4">
+<section class="analysis-section mb-4">
     <div class="section-heading">
         <div>
             <p class="eyebrow mb-1">Merchant detail</p>
             <h2>Explore merchants</h2>
         </div>
-        <span class="text-muted small">Select a merchant to see its transactions</span>
+        <a class="btn btn-outline-secondary btn-sm" asp-controller="Analysis" asp-action="Merchants">Open merchant explorer</a>
     </div>
-    <div class="merchant-layout">
-        <div class="merchant-list" role="list" aria-label="Merchants">
-            @foreach (var merchant in merchants)
-            {
-                var merchantGroup = Model.Summary.ByMerchant[merchant];
-                <button class="merchant-item" type="button" data-merchant="@merchant" role="listitem" aria-label="View details for @merchant">
-                    <span class="merchant-item-name">@merchant</span>
-                    <span class="merchant-item-meta">@merchantGroup.Count transaction@(merchantGroup.Count == 1 ? "" : "s")</span>
-                    <strong>@merchantGroup.TotalNet.ToString("C")</strong>
-                </button>
-            }
-        </div>
-        <div class="merchant-detail" id="merchant-detail" aria-live="polite">
-            <div class="merchant-empty-state" id="merchant-empty-state">
-                <p class="eyebrow mb-2">Merchant snapshot</p>
-                <h3>Select a merchant</h3>
-                <p class="text-muted mb-0">Choose a merchant to view monthly totals and every transaction.</p>
-            </div>
-            <div id="merchant-detail-content" hidden>
-                <div class="merchant-detail-heading">
-                    <div>
-                        <p class="eyebrow mb-1">Selected merchant</p>
-                        <h3 id="merchant-detail-name"></h3>
-                    </div>
-                    <div class="merchant-detail-total">
-                        <span id="merchant-detail-count"></span>
-                        <strong id="merchant-detail-total"></strong>
-                    </div>
-                </div>
-                <div id="merchant-months" class="merchant-months"></div>
-                <div>
-                    <p class="eyebrow mb-2">Transactions</p>
-                    <div id="merchant-detail-list" class="detail-list"></div>
-                </div>
-            </div>
-        </div>
+    <div class="dashboard-callout">
+        <strong>@Model.Summary.ByMerchant.Count merchants tracked</strong>
+        <span class="text-muted">Search, filter, and inspect merchant activity on the dedicated explorer.</span>
     </div>
 </section>
 
@@ -171,11 +202,11 @@
                         </table>
                     </div>
                     <div class="col-lg-6">
-                        <h3 class="h5">Top merchants</h3>
+                        <h3 class="h5">Recent activity</h3>
                         <table class="table table-sm">
-                            @foreach (var merchant in Model.Summary.ByMerchant.OrderByDescending(x => x.Value.TotalSpent).Take(10))
+                            @foreach (var transaction in recentTransactions)
                             {
-                                <tr><td>@merchant.Key</td><td class="text-end">@merchant.Value.TotalSpent.ToString("C")</td></tr>
+                                <tr><td>@transaction.Description</td><td class="text-end">@transaction.NetAmount.ToString("C")</td></tr>
                             }
                         </table>
                     </div>
@@ -185,61 +216,3 @@
     </div>
 </div>
 
-<div class="mt-5">
-    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#raw-data-table" aria-expanded="false" aria-controls="raw-data-table">
-        Show raw data
-    </button>
-
-    <div class="collapse mt-3" id="raw-data-table">
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Transaction Date</th>
-                    <th>Posted Date</th>
-                    <th>Description</th>
-                    <th>Original Category</th>
-                    <th>Custom Category</th>
-                    <th>Debit</th>
-                    <th>Credit</th>
-                    <th>Net Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var transaction in Model.Transactions)
-                {
-                    <tr>
-                        <td>@transaction.TransactionDate.ToShortDateString()</td>
-                        <td>@transaction.PostedDate.ToShortDateString()</td>
-                        <td>@transaction.Description</td>
-                        <td>@transaction.Category</td>
-                        <td>@transaction.EffectiveCategory</td>
-                        <td>@transaction.Debit.ToString("C")</td>
-                        <td>@transaction.Credit.ToString("C")</td>
-                        <td style="color: @(transaction.NetAmount >= 0 ? "green" : "red")">
-                            @transaction.NetAmount.ToString("C")
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="offcanvas offcanvas-end" tabindex="-1" id="transaction-detail" aria-labelledby="transaction-detail-title">
-    <div class="offcanvas-header">
-        <div>
-            <p class="eyebrow mb-1">Transaction detail</p>
-            <h2 class="offcanvas-title" id="transaction-detail-title">Transaction detail</h2>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="detail-total mb-4">
-            <span id="transaction-detail-count">0 transactions</span>
-            <strong id="transaction-detail-total">$0.00</strong>
-        </div>
-        <div id="transaction-detail-list" class="detail-list"></div>
-    </div>
-</div>
-
-<script id="transaction-detail-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(detailTransactions))</script>

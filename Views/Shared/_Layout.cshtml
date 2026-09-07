@@ -34,6 +34,12 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Analysis" asp-action="Index">Analysis</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Analysis" asp-action="Merchants">Merchants</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Analysis" asp-action="Raw">Raw data</a>
+                        </li>
                         @{
                             var navigationCategoryRules = Configuration
                                 .GetSection("CustomCategoryRules")

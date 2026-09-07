@@ -19,15 +19,8 @@ namespace CreditCardAnalyzer.Controllers
 
         public IActionResult Index()
         {
-            var transactions = _transactionService.ImportTransactions();
             var categoryRules = GetCategoryRules();
-            var excludedCreditKeywords = GetExcludedCreditKeywords();
-
-            var enrichedTransactions = TransactionService.ApplyCustomCategoryRules(transactions, categoryRules);
-            var summary = TransactionService.BuildAnalysisSummary(
-                enrichedTransactions,
-                categoryRules,
-                excludedCreditKeywords);
+            var (enrichedTransactions, summary) = LoadAnalysis(categoryRules);
 
             var viewModel = new AnalysisViewModel
             {
@@ -37,6 +30,30 @@ namespace CreditCardAnalyzer.Controllers
             };
 
             return View(viewModel);
+        }
+
+        public IActionResult Merchants()
+        {
+            var (transactions, summary) = LoadAnalysis();
+
+            return View(new MerchantExplorerViewModel
+            {
+                Transactions = transactions,
+                Summary = summary
+            });
+        }
+
+        public IActionResult Raw()
+        {
+            var categoryRules = GetCategoryRules();
+            var transactions = TransactionService.ApplyCustomCategoryRules(
+                _transactionService.ImportTransactions(),
+                categoryRules);
+
+            return View(new RawTransactionsViewModel
+            {
+                Transactions = transactions
+            });
         }
 
         public IActionResult Month(string month)
@@ -88,6 +105,21 @@ namespace CreditCardAnalyzer.Controllers
                 QualifyingCredits = qualifyingCredits,
                 ExcludedCredits = excludedCredits
             });
+        }
+
+        private (List<Transaction> Transactions, AnalysisSummary Summary) LoadAnalysis(
+            List<CategoryRule>? categoryRules = null)
+        {
+            categoryRules ??= GetCategoryRules();
+            var transactions = TransactionService.ApplyCustomCategoryRules(
+                _transactionService.ImportTransactions(),
+                categoryRules);
+            var summary = TransactionService.BuildAnalysisSummary(
+                transactions,
+                categoryRules,
+                GetExcludedCreditKeywords());
+
+            return (transactions, summary);
         }
 
         private List<CategoryRule> GetCategoryRules()

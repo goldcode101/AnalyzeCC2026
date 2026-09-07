@@ -1,0 +1,52 @@
+@using System.Globalization
+@model CreditCardAnalyzer.Models.RawTransactionsViewModel
+
+<div class="analysis-heading">
+    <div>
+        <p class="eyebrow mb-1">Source data</p>
+        <h1 class="mb-0">Raw transactions</h1>
+    </div>
+    <a class="btn btn-outline-secondary" asp-controller="Analysis" asp-action="Index">Back to dashboard</a>
+</div>
+
+<section class="analysis-section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow mb-1">Imported activity</p>
+            <h2>All transaction records</h2>
+        </div>
+        <span class="text-muted small">@Model.Transactions.Count records</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered mb-0 raw-transactions-table">
+            <thead>
+                <tr>
+                    <th>Transaction Date</th>
+                    <th>Posted Date</th>
+                    <th>Description</th>
+                    <th>Original Category</th>
+                    <th>Effective Category</th>
+                    <th class="text-end">Debit</th>
+                    <th class="text-end">Credit</th>
+                    <th class="text-end">Net Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in Model.Transactions.OrderByDescending(transaction => transaction.TransactionDate))
+                {
+                    <tr>
+                        <td>@transaction.TransactionDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)</td>
+                        <td>@transaction.PostedDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)</td>
+                        <td>@transaction.Description</td>
+                        <td>@transaction.Category</td>
+                        <td>@transaction.EffectiveCategory</td>
+                        <td class="text-end">@transaction.Debit.ToString("C")</td>
+                        <td class="text-end">@transaction.Credit.ToString("C")</td>
+                        <td class="text-end @(transaction.NetAmount >= 0 ? "amount-positive" : "amount-negative")">@transaction.NetAmount.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

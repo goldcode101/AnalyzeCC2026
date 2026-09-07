@@ -1,0 +1,83 @@
+@using System.Globalization
+@using System.Text.Json
+@model CreditCardAnalyzer.Models.MerchantExplorerViewModel
+
+@{
+    var merchants = Model.Summary.ByMerchant
+        .OrderBy(merchant => merchant.Key, StringComparer.OrdinalIgnoreCase)
+        .Select(merchant => merchant.Key)
+        .ToList();
+    var detailTransactions = Model.Transactions
+        .Where(transaction => transaction.Debit > 0 || transaction.Credit > 0)
+        .Select(transaction => new
+        {
+            Month = transaction.TransactionDate.ToString("yyyy-MM"),
+            Category = transaction.EffectiveCategory,
+            Date = transaction.TransactionDate.ToString("MMM d, yyyy", CultureInfo.InvariantCulture),
+            Merchant = transaction.Description,
+            Amount = transaction.NetAmount,
+            IsRefund = transaction.Credit > 0,
+            OriginalCategory = transaction.Category
+        });
+}
+
+<div class="analysis-heading">
+    <div>
+        <p class="eyebrow mb-1">Merchant detail</p>
+        <h1 class="mb-0">Explore merchants</h1>
+    </div>
+    <a class="btn btn-outline-secondary" asp-controller="Analysis" asp-action="Index">Back to dashboard</a>
+</div>
+
+<section class="analysis-section merchant-explorer">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow mb-1">Transaction activity</p>
+            <h2>Search and inspect merchants</h2>
+        </div>
+        <span class="text-muted small">@merchants.Count merchants tracked</span>
+    </div>
+    <div class="merchant-layout">
+        <div>
+            <label class="visually-hidden" for="merchant-search">Search merchants</label>
+            <input class="form-control merchant-search mb-3" id="merchant-search" type="search" placeholder="Search merchants" />
+            <div class="merchant-list" role="list" aria-label="Merchants">
+                @foreach (var merchant in merchants)
+                {
+                    var merchantGroup = Model.Summary.ByMerchant[merchant];
+                    <button class="merchant-item" type="button" data-merchant="@merchant" role="listitem" aria-label="View details for @merchant">
+                        <span class="merchant-item-name">@merchant</span>
+                        <span class="merchant-item-meta">@merchantGroup.Count transaction@(merchantGroup.Count == 1 ? "" : "s")</span>
+                        <strong>@merchantGroup.TotalNet.ToString("C")</strong>
+                    </button>
+                }
+            </div>
+        </div>
+        <div class="merchant-detail" id="merchant-detail" aria-live="polite">
+            <div class="merchant-empty-state" id="merchant-empty-state">
+                <p class="eyebrow mb-2">Merchant snapshot</p>
+                <h3>Select a merchant</h3>
+                <p class="text-muted mb-0">Choose a merchant to view monthly totals and every transaction.</p>
+            </div>
+            <div id="merchant-detail-content" hidden>
+                <div class="merchant-detail-heading">
+                    <div>
+                        <p class="eyebrow mb-1">Selected merchant</p>
+                        <h3 id="merchant-detail-name"></h3>
+                    </div>
+                    <div class="merchant-detail-total">
+                        <span id="merchant-detail-count"></span>
+                        <strong id="merchant-detail-total"></strong>
+                    </div>
+                </div>
+                <div id="merchant-months" class="merchant-months"></div>
+                <div>
+                    <p class="eyebrow mb-2">Transactions</p>
+                    <div id="merchant-detail-list" class="detail-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script id="transaction-detail-data" type="application/json">@Html.Raw(JsonSerializer.Serialize(detailTransactions))</script>

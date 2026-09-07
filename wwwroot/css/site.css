@@ -52,6 +52,22 @@ a:hover {
   color: #fff;
 }
 
+.app-navbar .navbar-nav .nav-item + .nav-item {
+  border-left: 1px solid #2f4d6b;
+  margin-left: .35rem;
+  padding-left: .35rem;
+}
+
+@media (max-width: 575.98px) {
+  .app-navbar .navbar-nav .nav-item + .nav-item {
+    border-left: 0;
+    border-top: 1px solid #2f4d6b;
+    margin-left: 0;
+    padding-left: 0;
+    padding-top: .2rem;
+  }
+}
+
 .app-navbar .navbar-toggler {
   border-color: #52667b;
 }
@@ -222,6 +238,14 @@ code {
   gap: 1rem;
 }
 
+.analysis-heading-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  justify-content: end;
+}
+
 .analysis-heading {
   margin: 2rem 0 1.25rem;
 }
@@ -278,6 +302,88 @@ code {
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
   padding: 1.5rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, .65fr);
+  gap: 1rem;
+}
+
+.dashboard-panel {
+  min-width: 0;
+}
+
+.dashboard-month-list,
+.dashboard-category-list {
+  display: grid;
+  gap: .75rem;
+}
+
+.dashboard-month-row,
+.dashboard-category-row {
+  align-items: center;
+  color: #d9e2ec;
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  text-decoration: none;
+}
+
+.dashboard-month-row:hover,
+.dashboard-month-row:focus-visible {
+  color: #fff;
+}
+
+.dashboard-month-row strong,
+.dashboard-category-row strong {
+  color: #eaf4fb;
+  white-space: nowrap;
+}
+
+.dashboard-bar {
+  background: #203b59;
+  border-radius: 999px;
+  height: .55rem;
+  overflow: hidden;
+}
+
+.dashboard-bar span {
+  background: #68c5c0;
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
+.dashboard-category-row {
+  border-bottom: 1px solid #2f4d6b;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-bottom: .65rem;
+}
+
+.dashboard-callout {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.merchant-search {
+  background: #102035;
+  border-color: #416784;
+  color: #f1f6fb;
+}
+
+.merchant-search::placeholder {
+  color: #91a5b9;
+}
+
+.amount-positive {
+  color: #a9efc5 !important;
+}
+
+.amount-negative {
+  color: #f1a7a7 !important;
 }
 
 .section-heading {
@@ -550,6 +656,14 @@ code {
   }
 
   .merchant-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-heading-actions {
+    justify-content: start;
+  }
+
+  .dashboard-grid {
     grid-template-columns: 1fr;
   }
 

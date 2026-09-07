@@ -14,8 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	const merchantDetailTotal = document.getElementById('merchant-detail-total');
 	const merchantMonths = document.getElementById('merchant-months');
 	const merchantDetailList = document.getElementById('merchant-detail-list');
+	const merchantSearch = document.getElementById('merchant-search');
 
-	if (!dataElement || !detailTitle || !detailCount || !detailTotal || !detailList) {
+	if (!dataElement) {
 		return;
 	}
 
@@ -136,6 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			document.querySelectorAll('[data-merchant]').forEach((item) => item.classList.remove('is-selected'));
 			button.classList.add('is-selected');
 			renderMerchantDetails(button.dataset.merchant);
+		});
+	});
+
+	merchantSearch?.addEventListener('input', () => {
+		const query = merchantSearch.value.trim().toLocaleLowerCase();
+		document.querySelectorAll('[data-merchant]').forEach((button) => {
+			button.hidden = !button.dataset.merchant.toLocaleLowerCase().includes(query);
 		});
 	});
 });
