@@ -13,6 +13,8 @@ namespace CreditCardAnalyzer.Models
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public string EffectiveCategory { get; set; } = string.Empty;
+        public string SourceFile { get; set; } = string.Empty;
+        public bool IsDuplicate { get; set; }
         public decimal Debit { get; set; }
         public decimal Credit { get; set; }
 
@@ -52,18 +54,21 @@ namespace CreditCardAnalyzer.Models
         public List<Transaction> Transactions { get; set; } = new();
         public AnalysisSummary Summary { get; set; } = new();
         public List<CategoryRule> CategoryRules { get; set; } = new();
+        public decimal TransactionHighlightThreshold { get; set; }
     }
 
     public class MerchantExplorerViewModel
     {
         public List<Transaction> Transactions { get; set; } = new();
         public AnalysisSummary Summary { get; set; } = new();
+        public decimal TransactionHighlightThreshold { get; set; }
     }
 
     public class RawTransactionsViewModel
     {
         public List<Transaction> Transactions { get; set; } = new();
         public List<string> ExcludedCreditKeywords { get; set; } = new();
+        public decimal TransactionHighlightThreshold { get; set; }
     }
 
     public class MonthlySummaryViewModel
@@ -74,6 +79,6 @@ namespace CreditCardAnalyzer.Models
         public List<Transaction> Transactions { get; set; } = new();
         public decimal QualifyingCredits { get; set; }
         public decimal ExcludedCredits { get; set; }
+        public decimal TransactionHighlightThreshold { get; set; }
     }
 }
-

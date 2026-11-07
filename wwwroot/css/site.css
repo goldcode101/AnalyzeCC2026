@@ -386,6 +386,24 @@ code {
   color: #f1a7a7 !important;
 }
 
+.transaction-highlight {
+  align-items: center;
+  background: linear-gradient(145deg, #ffe8a6, #eab94e);
+  border: 1px solid #fff0bf;
+  border-radius: 50%;
+  box-shadow: 0 1px 5px rgba(234, 185, 78, .35), inset 0 1px 1px rgba(255, 255, 255, .6);
+  color: #392806;
+  display: inline-flex;
+  font-size: .75rem;
+  font-weight: 700;
+  height: 1.3rem;
+  justify-content: center;
+  line-height: 1;
+  margin-left: .35rem;
+  vertical-align: middle;
+  width: 1.3rem;
+}
+
 .raw-filter-grid {
   display: grid;
   grid-template-columns: minmax(14rem, 1.6fr) repeat(3, minmax(10rem, 1fr));

@@ -12,9 +12,12 @@
         Description = transaction.Description,
         OriginalCategory = transaction.Category,
         EffectiveCategory = transaction.EffectiveCategory,
+        SourceFile = transaction.SourceFile,
         Debit = transaction.Debit,
         Credit = transaction.Credit,
         NetAmount = transaction.NetAmount,
+        IsDuplicate = transaction.IsDuplicate,
+        IsHighlighted = Math.Abs(transaction.NetAmount) >= Model.TransactionHighlightThreshold,
         IsExcludedPayment = CreditCardAnalyzer.Services.TransactionService.IsExcludedCreditPayment(transaction, Model.ExcludedCreditKeywords)
     });
 }
@@ -33,7 +36,9 @@
             <p class="eyebrow mb-1">Imported activity</p>
             <h2>All transaction records</h2>
         </div>
-        <span class="text-muted small" id="raw-result-count">@Model.Transactions.Count records</span>
+        <span class="text-muted small" id="raw-result-count">
+            @Model.Transactions.Count records, @Model.Transactions.Count(transaction => transaction.IsDuplicate) duplicates excluded from totals
+        </span>
     </div>
 
     <div class="raw-toolbar mb-4">
@@ -81,12 +86,14 @@
                     <th><button class="raw-sort-button" type="button" data-raw-sort="date">Transaction Date</button></th>
                     <th><button class="raw-sort-button" type="button" data-raw-sort="postedDate">Posted Date</button></th>
                     <th><button class="raw-sort-button" type="button" data-raw-sort="description">Description</button></th>
+                    <th>Source file</th>
                     <th><button class="raw-sort-button" type="button" data-raw-sort="originalCategory">Original Category</button></th>
                     <th><button class="raw-sort-button" type="button" data-raw-sort="effectiveCategory">Effective Category</button></th>
                     <th class="text-end"><button class="raw-sort-button" type="button" data-raw-sort="debit">Debit</button></th>
                     <th class="text-end"><button class="raw-sort-button" type="button" data-raw-sort="credit">Credit</button></th>
                     <th class="text-end"><button class="raw-sort-button" type="button" data-raw-sort="netAmount">Net Amount</button></th>
                     <th>Type</th>
+                    <th>Duplicate</th>
                 </tr>
             </thead>
             <tbody id="raw-transactions-body"></tbody>

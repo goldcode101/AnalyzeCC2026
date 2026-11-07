@@ -24,7 +24,8 @@
             Merchant = transaction.Description,
             Amount = transaction.NetAmount,
             IsRefund = transaction.Credit > 0,
-            OriginalCategory = transaction.Category
+            OriginalCategory = transaction.Category,
+            IsHighlighted = Math.Abs(transaction.NetAmount) >= Model.TransactionHighlightThreshold
         });
 }
 
@@ -206,7 +207,16 @@
                         <table class="table table-sm">
                             @foreach (var transaction in recentTransactions)
                             {
-                                <tr><td>@transaction.Description</td><td class="text-end">@transaction.NetAmount.ToString("C")</td></tr>
+                                <tr>
+                                    <td>
+                                        @transaction.Description
+                                        @if (Math.Abs(transaction.NetAmount) >= Model.TransactionHighlightThreshold)
+                                        {
+                                            <span class="transaction-highlight" role="img" aria-label="High amount transaction" title="At or above the highlight threshold">$</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">@transaction.NetAmount.ToString("C")</td>
+                                </tr>
                             }
                         </table>
                     </div>
@@ -215,4 +225,3 @@
         </div>
     </div>
 </div>
-

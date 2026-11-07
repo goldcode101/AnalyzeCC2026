@@ -9,21 +9,51 @@ namespace CreditCardAnalyzer.Services
 {
     public class TransactionService
     {
-        private readonly string _csvPath;
+        private readonly List<string> _csvPaths;
 
-        public TransactionService(string csvPath)
+        public TransactionService(IEnumerable<string> csvPaths)
         {
-            _csvPath = csvPath;
+            _csvPaths = csvPaths.ToList();
+            if (_csvPaths.Count == 0)
+            {
+                throw new ArgumentException("At least one transaction CSV file must be available.", nameof(csvPaths));
+            }
+        }
+
+        public static List<string> DiscoverTransactionFiles(
+            string dataDirectory,
+            IEnumerable<string>? excludedFileNames = null)
+        {
+            var excludedFiles = new HashSet<string>(
+                excludedFileNames ?? Array.Empty<string>(),
+                StringComparer.OrdinalIgnoreCase);
+
+            return Directory.GetFiles(dataDirectory, "*.csv", SearchOption.TopDirectoryOnly)
+                .Where(path => !excludedFiles.Contains(Path.GetFileName(path)))
+                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         public List<Transaction> ImportTransactions()
         {
-            using (var reader = new StreamReader(_csvPath))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            var transactions = new List<Transaction>();
+            var seenTransactions = new HashSet<TransactionIdentity>();
+
+            foreach (var csvPath in _csvPaths)
             {
+                using var reader = new StreamReader(csvPath);
+                using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
                 csv.Context.RegisterClassMap<TransactionMap>();
-                return csv.GetRecords<Transaction>().ToList();
+
+                foreach (var transaction in csv.GetRecords<Transaction>())
+                {
+                    transaction.SourceFile = Path.GetFileName(csvPath);
+                    transaction.IsDuplicate = !seenTransactions.Add(TransactionIdentity.From(transaction));
+                    transactions.Add(transaction);
+                }
             }
+
+            return transactions;
         }
 
         public static List<Transaction> ApplyCustomCategoryRules(IEnumerable<Transaction> transactions,
@@ -152,6 +182,25 @@ namespace CreditCardAnalyzer.Services
             }
 
             AddToGroup(categoryGroups, innerKey, transaction);
+        }
+
+        private readonly record struct TransactionIdentity(
+            DateTime TransactionDate,
+            DateTime PostedDate,
+            string CardNo,
+            string Description,
+            string Category,
+            decimal Debit,
+            decimal Credit)
+        {
+            public static TransactionIdentity From(Transaction transaction) => new(
+                transaction.TransactionDate,
+                transaction.PostedDate,
+                transaction.CardNo,
+                transaction.Description,
+                transaction.Category,
+                transaction.Debit,
+                transaction.Credit);
         }
 
         private class TransactionMap : ClassMap<Transaction>

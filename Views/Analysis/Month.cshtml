@@ -106,7 +106,13 @@
                         <td>@transaction.EffectiveCategory</td>
                         <td class="text-end">@transaction.Debit.ToString("C")</td>
                         <td class="text-end">@transaction.Credit.ToString("C")</td>
-                        <td class="text-end">@transaction.NetAmount.ToString("C")</td>
+                        <td class="text-end">
+                            @transaction.NetAmount.ToString("C")
+                            @if (Math.Abs(transaction.NetAmount) >= Model.TransactionHighlightThreshold)
+                            {
+                                <span class="transaction-highlight" role="img" aria-label="High amount transaction" title="At or above the highlight threshold">$</span>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>

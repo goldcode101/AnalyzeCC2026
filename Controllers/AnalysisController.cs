@@ -20,9 +20,12 @@ namespace CreditCardAnalyzer.Controllers
         {
             var viewModel = new AnalysisViewModel
             {
-                Transactions = _analysisDataService.Transactions,
+                Transactions = _analysisDataService.Transactions
+                    .Where(transaction => !transaction.IsDuplicate)
+                    .ToList(),
                 Summary = _analysisDataService.Summary,
-                CategoryRules = _analysisDataService.CategoryRules
+                CategoryRules = _analysisDataService.CategoryRules,
+                TransactionHighlightThreshold = _analysisDataService.TransactionHighlightThreshold
             };
 
             return View(viewModel);
@@ -32,8 +35,11 @@ namespace CreditCardAnalyzer.Controllers
         {
             return View(new MerchantExplorerViewModel
             {
-                Transactions = _analysisDataService.Transactions,
-                Summary = _analysisDataService.Summary
+                Transactions = _analysisDataService.Transactions
+                    .Where(transaction => !transaction.IsDuplicate)
+                    .ToList(),
+                Summary = _analysisDataService.Summary,
+                TransactionHighlightThreshold = _analysisDataService.TransactionHighlightThreshold
             });
         }
 
@@ -42,7 +48,8 @@ namespace CreditCardAnalyzer.Controllers
             return View(new RawTransactionsViewModel
             {
                 Transactions = _analysisDataService.Transactions,
-                ExcludedCreditKeywords = _analysisDataService.ExcludedCreditKeywords
+                ExcludedCreditKeywords = _analysisDataService.ExcludedCreditKeywords,
+                TransactionHighlightThreshold = _analysisDataService.TransactionHighlightThreshold
             });
         }
 
@@ -59,6 +66,7 @@ namespace CreditCardAnalyzer.Controllers
                 return NotFound();
             }
 
+            monthlySummary.TransactionHighlightThreshold = _analysisDataService.TransactionHighlightThreshold;
             return View(monthlySummary);
         }
 

@@ -7,9 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<AnalysisOptions>(builder.Configuration);
 
-// Register TransactionService (pass your CSV path)
+// Discover CSV files in Data, omitting any configured exclusions.
 builder.Services.AddSingleton(_ =>
-    new TransactionService("Data/2026-08-26_transaction_download.csv")     //This needs to be path to csv file.
+    new TransactionService(
+        TransactionService.DiscoverTransactionFiles(
+            Path.Combine(builder.Environment.ContentRootPath, "Data"),
+            builder.Configuration.GetSection("ExcludedTransactionFiles").Get<string[]>()))
 );
 builder.Services.AddScoped<AnalysisDataService>();
 

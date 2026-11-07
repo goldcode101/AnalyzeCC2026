@@ -17,7 +17,8 @@
             Merchant = transaction.Description,
             Amount = transaction.NetAmount,
             IsRefund = transaction.Credit > 0,
-            OriginalCategory = transaction.Category
+            OriginalCategory = transaction.Category,
+            IsHighlighted = Math.Abs(transaction.NetAmount) >= Model.TransactionHighlightThreshold
         });
 }
 

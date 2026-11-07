@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (rawDataElement) {
 		const rawTransactions = JSON.parse(rawDataElement.textContent || '[]');
+		const duplicateCount = rawTransactions.filter((transaction) => transaction.IsDuplicate).length;
 		const rawBody = document.getElementById('raw-transactions-body');
 		const rawSearch = document.getElementById('raw-search');
 		const rawMonth = document.getElementById('raw-month');
@@ -102,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					transaction.Date,
 					transaction.PostedDate,
 					transaction.Description,
+					transaction.SourceFile,
 					transaction.OriginalCategory,
 					transaction.EffectiveCategory,
 					rawCurrency.format(transaction.Debit),
@@ -112,8 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
 				cells.forEach((value, index) => {
 					const cell = document.createElement('td');
 					cell.textContent = value;
-					if (index >= 5) {
-						cell.className = `text-end ${index === 7 ? (transaction.NetAmount >= 0 ? 'amount-positive' : 'amount-negative') : ''}`;
+					if (index >= 6) {
+						cell.className = `text-end ${index === 8 ? (transaction.NetAmount >= 0 ? 'amount-positive' : 'amount-negative') : ''}`;
+					}
+					if (index === 8 && transaction.IsHighlighted) {
+						const badge = document.createElement('span');
+						badge.className = 'transaction-highlight';
+						badge.textContent = '$';
+						badge.setAttribute('role', 'img');
+						badge.setAttribute('aria-label', 'High amount transaction');
+						badge.title = 'At or above the highlight threshold';
+						cell.append(' ', badge);
 					}
 					row.append(cell);
 				});
@@ -124,18 +135,26 @@ document.addEventListener('DOMContentLoaded', () => {
 				typeBadge.textContent = rawTypeLabel(type);
 				typeCell.append(typeBadge);
 				row.append(typeCell);
+
+				const duplicateCell = document.createElement('td');
+				if (transaction.IsDuplicate) {
+					duplicateCell.textContent = 'Duplicate';
+					duplicateCell.className = 'text-danger';
+				}
+				row.append(duplicateCell);
 				rawBody.append(row);
 			});
 
-			rawResultCount.textContent = `${filtered.length} of ${rawTransactions.length} records`;
-			rawTotalDebit.textContent = rawCurrency.format(filtered.reduce((sum, transaction) => sum + transaction.Debit, 0));
-			rawTotalCredit.textContent = rawCurrency.format(filtered
+			rawResultCount.textContent = `${filtered.length} of ${rawTransactions.length} records; ${duplicateCount} duplicates excluded from totals`;
+			const nonDuplicates = filtered.filter((transaction) => !transaction.IsDuplicate);
+			rawTotalDebit.textContent = rawCurrency.format(nonDuplicates.reduce((sum, transaction) => sum + transaction.Debit, 0));
+			rawTotalCredit.textContent = rawCurrency.format(nonDuplicates
 				.filter((transaction) => !transaction.IsExcludedPayment)
 				.reduce((sum, transaction) => sum + transaction.Credit, 0));
-			rawTotalExcluded.textContent = rawCurrency.format(filtered
+			rawTotalExcluded.textContent = rawCurrency.format(nonDuplicates
 				.filter((transaction) => transaction.IsExcludedPayment)
 				.reduce((sum, transaction) => sum + transaction.Credit, 0));
-			rawTotalNet.textContent = rawCurrency.format(filtered
+			rawTotalNet.textContent = rawCurrency.format(nonDuplicates
 				.filter((transaction) => !transaction.IsExcludedPayment)
 				.reduce((sum, transaction) => sum + transaction.NetAmount, 0));
 		};
@@ -233,7 +252,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			description.append(date, metadata);
 			const amount = document.createElement('strong');
 			amount.textContent = currency.format(transaction.Amount);
-			row.append(description, amount);
+			if (transaction.IsHighlighted) {
+				const badge = document.createElement('span');
+				badge.className = 'transaction-highlight';
+				badge.textContent = '$';
+				badge.setAttribute('role', 'img');
+				badge.setAttribute('aria-label', 'High amount transaction');
+				badge.title = 'At or above the highlight threshold';
+				row.append(description, badge, amount);
+			} else {
+				row.append(description, amount);
+			}
 			merchantDetailList.append(row);
 		});
 	};
@@ -275,7 +304,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			const amount = document.createElement('strong');
 			amount.textContent = currency.format(transaction.Amount);
-			row.append(description, amount);
+			if (transaction.IsHighlighted) {
+				const badge = document.createElement('span');
+				badge.className = 'transaction-highlight';
+				badge.textContent = '$';
+				badge.setAttribute('role', 'img');
+				badge.setAttribute('aria-label', 'High amount transaction');
+				badge.title = 'At or above the highlight threshold';
+				row.append(description, badge, amount);
+			} else {
+				row.append(description, amount);
+			}
 			detailList.append(row);
 		});
 	};

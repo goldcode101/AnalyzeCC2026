@@ -58,6 +58,8 @@ namespace CreditCardAnalyzer.Services
             }
         }
 
+        public decimal TransactionHighlightThreshold => _options.TransactionHighlightThreshold;
+
         private void EnsureLoaded()
         {
             if (_isLoaded)
@@ -67,11 +69,12 @@ namespace CreditCardAnalyzer.Services
 
             _categoryRules = _options.CustomCategoryRules;
             _excludedCreditKeywords = _options.ExcludedCreditKeywords;
+            var importedTransactions = _transactionService.ImportTransactions();
             _transactions = TransactionService.ApplyCustomCategoryRules(
-                _transactionService.ImportTransactions(),
+                importedTransactions,
                 _categoryRules);
             _summary = TransactionService.BuildAnalysisSummary(
-                _transactions,
+                _transactions.Where(transaction => !transaction.IsDuplicate),
                 _categoryRules,
                 _excludedCreditKeywords);
             _isLoaded = true;
@@ -90,7 +93,8 @@ namespace CreditCardAnalyzer.Services
                 ? monthlySpending
                 : new TransactionGroup { Name = month };
             var monthTransactions = Transactions
-                .Where(transaction => transaction.TransactionDate.ToString("yyyy-MM") == month)
+                .Where(transaction => !transaction.IsDuplicate &&
+                    transaction.TransactionDate.ToString("yyyy-MM") == month)
                 .ToList();
             var excludedCredits = monthTransactions
                 .Where(transaction => TransactionService.IsExcludedCreditPayment(transaction, ExcludedCreditKeywords))
